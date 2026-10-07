@@ -45,12 +45,19 @@ def collect_route(
             if calls >= max_calls:
                 return calls
             label = f"{spec.code} {trip} {lead}d"
-            try:
-                payload = SOURCES["google_flights"](
-                    spec.origin, spec.destination, lead, trip
-                )
-            except Exception as exc:
-                print(f"  ERRO {label}: {exc}", file=sys.stderr)
+            payload = None
+            for attempt in range(2):
+                try:
+                    payload = SOURCES["google_flights"](
+                        spec.origin, spec.destination, lead, trip
+                    )
+                    break
+                except Exception as exc:
+                    if attempt == 1:
+                        print(f"  ERRO {label}: {exc}", file=sys.stderr)
+                    else:
+                        time.sleep(random.uniform(5, 15))
+            if payload is None:
                 calls += 1
                 continue
 
