@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Env
+.env
+.env.local
+
+# Coletas brutas locais
+raw/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# SO
+.DS_Store
+Thumbs.db

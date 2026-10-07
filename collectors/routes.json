@@ -1,0 +1,12 @@
+[
+  { "origin": "GRU", "destination": "SSA", "kind": "nacional", "priority": 1 },
+  { "origin": "GRU", "destination": "REC", "kind": "nacional", "priority": 1 },
+  { "origin": "CGH", "destination": "SDU", "kind": "nacional", "priority": 1 },
+  { "origin": "GRU", "destination": "BSB", "kind": "nacional", "priority": 1 },
+  { "origin": "GRU", "destination": "POA", "kind": "nacional", "priority": 1 },
+  { "origin": "SSA", "destination": "BSB", "kind": "nacional", "priority": 1 },
+  { "origin": "GRU", "destination": "LIS", "kind": "internacional", "priority": 1 },
+  { "origin": "GRU", "destination": "MIA", "kind": "internacional", "priority": 1 },
+  { "origin": "GRU", "destination": "EZE", "kind": "internacional", "priority": 1 },
+  { "origin": "SSA", "destination": "LIS", "kind": "internacional", "priority": 1 }
+]
