@@ -73,6 +73,8 @@ export const CITIES: Record<string, string> = {
   CDG: "Paris",
   MAD: "Madri",
   JFK: "Nova York",
+  BOG: "Bogotá",
+  SID: "Sal (Cabo Verde)",
 };
 
 export function cityName(iata: string) {

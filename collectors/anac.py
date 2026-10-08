@@ -37,6 +37,7 @@ IATA_ICAO = {
     "FLN": "SBFL", "VCP": "SBKP",
     "LIS": "LPPT", "MIA": "KMIA", "MCO": "KMCO", "EZE": "SAEZ",
     "SCL": "SCEL", "CDG": "LFPG", "MAD": "LEMD", "JFK": "KJFK",
+    "BOG": "SKBO", "SID": "GVAC",
 }
 ICAO_IATA = {v: k for k, v in IATA_ICAO.items()}
 

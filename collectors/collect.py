@@ -63,9 +63,13 @@ def collect_route(
 
             payload["collected_at"] = datetime.now(timezone.utc).isoformat()
             raw_ref = storage.save_raw(payload, client)
-            rows = db.normalize_observations(route_id, payload, raw_ref) if client else []
             if client:
-                db.insert_observations(client, rows)
+                try:
+                    rows = db.normalize_observations(route_id, payload, raw_ref)
+                    db.insert_observations(client, rows)
+                except Exception as exc:
+                    # bruto ja esta salvo; falha de escrita nao derruba o lote
+                    print(f"  ERRO DB {label}: {exc}", file=sys.stderr)
 
             best = min((o["price"] for o in payload["options"]), default=None)
             print(f"  ok {label}: {len(payload['options'])} opcoes, menor R$ {best} -> {raw_ref}")
