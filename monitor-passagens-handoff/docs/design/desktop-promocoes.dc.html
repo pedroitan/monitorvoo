@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Calendário de promoções — Monitor de Passagens</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0;background:#F2F3F0;color:#0E1A2B;font-family:'IBM Plex Sans',system-ui,sans-serif}
+a{color:#2457C5}a:hover{color:#163A8A}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.disp{font-family:'Bricolage Grotesque','IBM Plex Sans',sans-serif}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F2F3F0">
+
+<header style="background: #0E1A2B; color: #FFFFFF">
+<div style="max-width: 1240px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap">
+<a href="Main.dc.html" class="disp" style="color: #FFFFFF; text-decoration: none; font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F07B3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+Monitor de Passagens</a>
+<nav aria-label="Principal" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+<a href="Rota.dc.html" style="color: #DCE3EE; text-decoration: none; padding: 12px 14px; font-weight: 500">Rotas</a>
+<a href="Promocoes.dc.html" aria-current="page" style="color: #FFFFFF; text-decoration: underline; text-underline-offset: 6px; padding: 12px 14px; font-weight: 600">Promoções</a>
+<a href="Alertas.dc.html" style="color: #DCE3EE; text-decoration: none; padding: 12px 14px; font-weight: 500">Meus alertas</a>
+<a href="Alertas.dc.html" style="color: #0E1A2B; background: #FFFFFF; text-decoration: none; padding: 12px 18px; border-radius: 8px; font-weight: 600">Entrar</a>
+</nav>
+</div>
+</header>
+
+<main style="max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 28px">
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 class="disp" style="margin: 0; font-size: 44px; font-weight: 700">Calendário de promoções</h1>
+<p style="margin: 0; color: #3B4759; font-size: 17px; max-width: 760px; line-height: 1.5">Marcamos uma promoção quando várias rotas de uma mesma companhia caem bem abaixo do normal no mesmo dia.</p>
+</div>
+
+<div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center">
+<div style="display: flex; gap: 6px; flex-wrap: wrap" role="group" aria-label="Companhias">
+<button aria-pressed="true" style="height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid #0E1A2B; background: #0E1A2B; color: #FFFFFF; font: inherit; font-weight: 600">Todas</button>
+<button style="height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">LATAM</button>
+<button style="height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">GOL</button>
+<button style="height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">Azul</button>
+<button style="height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">Internacionais</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="periodo" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Período</label>
+<select id="periodo" style="height: 44px; border: 1px solid #C7CDD6; border-radius: 8px; padding: 0 12px; font: inherit; background: #FFFFFF; color: #0E1A2B">
+<option>Últimos 90 dias</option>
+<option>Últimos 6 meses</option>
+<option>Último ano</option>
+</select>
+</div>
+</div>
+
+<section aria-labelledby="linha-h" style="background: #FFFFFF; border: 1px solid #E1E4E8; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap">
+<h2 id="linha-h" class="disp" style="margin: 0; font-size: 22px; font-weight: 700">Linha do tempo</h2>
+<div style="display: flex; gap: 16px; font-size: 13px; color: #3B4759; flex-wrap: wrap">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 18px; height: 12px; background: #D9581C; border-radius: 3px"></span>Encerrada</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 18px; height: 12px; background: #FFFFFF; border: 2px solid #D9581C; border-radius: 3px"></span>Em andamento</span>
+</div>
+</div>
+<div style="overflow-x: auto">
+<div style="min-width: 900px; display: grid; grid-template-columns: 120px 1fr; row-gap: 0">
+<div></div>
+<div class="mono" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); font-size: 12px; color: #556274; padding-bottom: 8px; border-bottom: 1px solid #D5DAE1">
+<span>julho</span><span>agosto</span><span>setembro → 06 out</span>
+</div>
+<sc-for list="{{linhas}}" as="l" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; height: 56px; font-weight: 600; border-bottom: 1px solid #EEF0F3">{{l.cia}}</div>
+<div style="position: relative; height: 56px; border-bottom: 1px solid #EEF0F3; background: linear-gradient(90deg, transparent 33.2%, #EEF0F3 33.2%, #EEF0F3 33.4%, transparent 33.4%, transparent 66.5%, #EEF0F3 66.5%, #EEF0F3 66.7%, transparent 66.7%)">
+<sc-for list="{{l.eventos}}" as="e" hint-placeholder-count="2">
+<a href="Rota.dc.html" title="{{e.titulo}}" style="position: absolute; top: 12px; height: 32px; left: {{e.left}}; width: {{e.width}}; min-width: 44px; box-sizing: border-box; background: {{e.fundo}}; border: 2px solid #D9581C; border-radius: 6px; color: {{e.texto}}; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; text-decoration: none; white-space: nowrap" class="mono">{{e.desc}}</a>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section aria-labelledby="padrao-h" style="background: #FFFFFF; border: 1px solid #E1E4E8; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div>
+<h2 id="padrao-h" class="disp" style="margin: 0; font-size: 22px; font-weight: 700">Padrão de cada companhia</h2>
+<p style="margin: 4px 0 0; color: #556274; font-size: 14px">Últimos 90 dias</p>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 760px; border-collapse: collapse; font-size: 15px">
+<thead>
+<tr style="text-align: left; color: #556274; font-size: 13px">
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600">Companhia</th>
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600; text-align: right">Promoções</th>
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600; text-align: right">Duração média</th>
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600; text-align: right">Desconto médio</th>
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600">Costuma começar</th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{padrao}}" as="p" hint-placeholder-count="5">
+<tr>
+<th scope="row" style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3; text-align: left; font-weight: 600">{{p.cia}}</th>
+<td class="mono" style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3; text-align: right">{{p.qtd}}</td>
+<td class="mono" style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3; text-align: right">{{p.duracao}}</td>
+<td class="mono" style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3; text-align: right; color: #B5410F; font-weight: 600">{{p.desconto}}</td>
+<td style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3; color: #3B4759">{{p.dia}}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<section style="background: #0E1A2B; color: #FFFFFF; border-radius: 14px; padding: 24px; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap">
+<div>
+<h2 class="disp" style="margin: 0; font-size: 22px; font-weight: 700">Quer saber assim que começar uma promoção?</h2>
+<p style="margin: 6px 0 0; color: #C3CDDB">Escolha as rotas e avisamos por e-mail ou Telegram.</p>
+</div>
+<a href="Alertas.dc.html" style="height: 48px; display: flex; align-items: center; padding: 0 22px; background: #D9581C; color: #FFFFFF; border-radius: 8px; text-decoration: none; font-weight: 600">Criar alerta de promoção</a>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1380}}'>
+class Component extends DCLogic {
+  renderVals() {
+    function ev(ini, fim, desc, ativo) {
+      var dur = Math.max(fim - ini, 1);
+      return {
+        left: (ini / 91 * 100).toFixed(2) + '%',
+        width: (dur / 91 * 100).toFixed(2) + '%',
+        desc: desc,
+        titulo: desc + (ativo ? ' · em andamento' : ''),
+        fundo: ativo ? '#FFFFFF' : '#D9581C',
+        texto: ativo ? '#8E3510' : '#FFFFFF'
+      };
+    }
+    return {
+      linhas: [
+        { cia: 'LATAM', eventos: [ev(10, 14, '−26%'), ev(43, 48, '−29%'), ev(89, 91, '−31%', true)] },
+        { cia: 'GOL', eventos: [ev(24, 27, '−22%'), ev(64, 69, '−25%')] },
+        { cia: 'Azul', eventos: [ev(20, 23, '−19%'), ev(90, 91, '−24%', true)] },
+        { cia: 'TAP', eventos: [ev(76, 81, '−28%')] },
+        { cia: 'American', eventos: [ev(35, 39, '−21%')] }
+      ],
+      padrao: [
+        { cia: 'LATAM', qtd: '3', duracao: '4 dias', desconto: '−29%', dia: 'Terça-feira, à noite' },
+        { cia: 'GOL', qtd: '2', duracao: '4 dias', desconto: '−24%', dia: 'Quinta-feira' },
+        { cia: 'Azul', qtd: '2', duracao: '3 dias', desconto: '−22%', dia: 'Segunda-feira' },
+        { cia: 'TAP', qtd: '1', duracao: '5 dias', desconto: '−28%', dia: 'Segunda-feira' },
+        { cia: 'American', qtd: '1', duracao: '4 dias', desconto: '−21%', dia: 'Quarta-feira' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

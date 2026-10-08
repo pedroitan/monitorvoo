@@ -8,6 +8,7 @@ export type Route = {
 };
 
 export type Observation = {
+  route_id: string;
   airline: string;
   collected_at: string;
   flight_date: string;
@@ -19,11 +20,141 @@ export type Observation = {
   source: string;
 };
 
+export type PromoEvent = {
+  id: string;
+  airline: string;
+  started_at: string;
+  ended_at: string | null;
+  affected_routes: string[];
+  avg_discount_pct: number | null;
+};
+
+export type RouteStatus = "abaixo" | "normal" | "acima" | "coletando";
+
+export type RouteStats = {
+  n: number;
+  min: number;
+  p25: number;
+  median: number;
+  p75: number;
+  max: number;
+  todayMin: number | null;
+  diffPct: number | null;
+  status: RouteStatus;
+  firstDay: string;
+  lastDay: string;
+};
+
 export const LEAD_TIMES = [7, 14, 30, 60, 90, 180];
 export const TRIP_TYPES = ["one-way", "round-trip"] as const;
+export const MIN_POINTS = 10; // minimo de dias de coleta para julgar (mesmo do detect.py)
+export const STATS_WINDOW_DAYS = 28;
+
+export const CITIES: Record<string, string> = {
+  GRU: "São Paulo–Guarulhos",
+  CGH: "São Paulo–Congonhas",
+  SDU: "Rio–Santos Dumont",
+  GIG: "Rio–Galeão",
+  SSA: "Salvador",
+  REC: "Recife",
+  FOR: "Fortaleza",
+  BSB: "Brasília",
+  POA: "Porto Alegre",
+  CNF: "Belo Horizonte",
+  MAO: "Manaus",
+  BEL: "Belém",
+  FLN: "Florianópolis",
+  VCP: "Campinas",
+  LIS: "Lisboa",
+  MIA: "Miami",
+  MCO: "Orlando",
+  EZE: "Buenos Aires",
+  SCL: "Santiago",
+  CDG: "Paris",
+  MAD: "Madri",
+  JFK: "Nova York",
+};
+
+export function cityName(iata: string) {
+  return CITIES[iata] ?? iata;
+}
+
+/** Cores de serie no grafico — paleta dos tokens de design. */
+export const AIRLINE_COLORS: Record<string, string> = {
+  LATAM: "#2457C5",
+  "Tap Air Portugal": "#0B7A6C",
+  Azul: "#7B3FB0",
+  Gol: "#B3862E",
+  American: "#8A9BB4",
+  United: "#5B7AA0",
+  "Air France": "#7C6BAE",
+  Iberia: "#B26E63",
+  "Air Europa": "#4E8C7B",
+  "Aerolineas Argentinas": "#6FA8DC",
+  COPA: "#3D7EAA",
+  Avianca: "#A05050",
+  Emirates: "#8C6A3F",
+};
+
+export const AIRLINE_SITES: Record<string, string> = {
+  Gol: "https://www.voegol.com.br",
+  LATAM: "https://www.latamairlines.com/br/pt",
+  Azul: "https://www.voeazul.com.br",
+  "Tap Air Portugal": "https://www.flytap.com/pt-br",
+  American: "https://www.aa.com",
+  United: "https://www.united.com",
+  "Aerolineas Argentinas": "https://www.aerolineas.com",
+  "Air France": "https://wwws.airfrance.com.br",
+  Iberia: "https://www.iberia.com/br/pt",
+  "Air Europa": "https://www.aireuropa.com",
+  COPA: "https://www.copaair.com",
+  Avianca: "https://www.avianca.com/br",
+  Emirates: "https://www.emirates.com/br/portuguese",
+};
+
+export function airlineSite(airline: string, origin: string, destination: string) {
+  return (
+    AIRLINE_SITES[airline] ??
+    `https://www.google.com/travel/flights?q=${origin}%20${destination}`
+  );
+}
+
+/** Nome curto da cia para UI. */
+export function airlineShort(airline: string) {
+  const map: Record<string, string> = {
+    "Tap Air Portugal": "TAP",
+    "Aerolineas Argentinas": "Aerolíneas",
+  };
+  return map[airline] ?? airline;
+}
 
 export function routeCode(r: Pick<Route, "origin" | "destination">) {
   return `${r.origin}-${r.destination}`;
+}
+
+// ---------- queries ----------
+
+const OBS_SELECT =
+  "route_id, airline, collected_at, flight_date, return_date, lead_days, trip_type, price_brl, stops, source";
+
+/** Busca paginada — Supabase devolve no max 1000 linhas por chamada. */
+interface Pageable<T> {
+  range(
+    from: number,
+    to: number
+  ): PromiseLike<{ data: T[] | null; error: { message: string } | null }>;
+}
+
+async function fetchAll<T>(makeQuery: () => Pageable<T>): Promise<T[]> {
+  const out: T[] = [];
+  let page = 0;
+  for (;;) {
+    const res = await makeQuery().range(page * 1000, (page + 1) * 1000 - 1);
+    if (res.error) throw new Error(res.error.message);
+    out.push(...(res.data ?? []));
+    if ((res.data?.length ?? 0) < 1000) return out;
+    page += 1;
+  }
 }
 
 export async function getRoutes(): Promise<Route[]> {
@@ -49,42 +180,211 @@ export async function getRouteByCode(code: string): Promise<Route | null> {
   return data;
 }
 
-export async function getObservations(
-  routeId: string,
-  trip: string,
-  lead: number
-): Promise<Observation[]> {
+/** Todas as observacoes de uma rota (todas as combinacoes). */
+export async function getObservations(routeId: string): Promise<Observation[]> {
+  return fetchAll(() =>
+    supabase
+      .from("fare_observations")
+      .select(OBS_SELECT)
+      .eq("route_id", routeId)
+      .order("collected_at")
+  );
+}
+
+/** Todas as observacoes (para a home: selos e sparklines por rota). */
+export async function getAllObservations(): Promise<Observation[]> {
+  return fetchAll(() =>
+    supabase.from("fare_observations").select(OBS_SELECT).order("collected_at")
+  );
+}
+
+export async function getPromoEvents(): Promise<PromoEvent[]> {
   const { data, error } = await supabase
-    .from("fare_observations")
-    .select(
-      "airline, collected_at, flight_date, return_date, lead_days, trip_type, price_brl, stops, source"
-    )
-    .eq("route_id", routeId)
-    .eq("trip_type", trip)
-    .eq("lead_days", lead)
-    .order("collected_at");
+    .from("promo_events")
+    .select("id, airline, started_at, ended_at, affected_routes, avg_discount_pct")
+    .order("started_at", { ascending: false })
+    .limit(50);
   if (error) throw error;
   return data ?? [];
 }
 
-/** Menor preco por rota na coleta mais recente (para os cards da home). */
-export async function getLatestMinPrices(): Promise<Record<string, number>> {
+/** Sazonalidade ANAC: indice mensal (100 = media anual) para o par de aeroportos. */
+export async function getSeasonality(
+  origin: string,
+  destination: string
+): Promise<(number | null)[]> {
   const { data, error } = await supabase
-    .from("fare_observations")
-    .select("route_id, collected_at, price_brl")
-    .order("collected_at", { ascending: false });
+    .from("anac_fares")
+    .select("month, fare, seats")
+    .eq("origin", origin)
+    .eq("destination", destination);
   if (error) throw error;
+  const rows = data ?? [];
+  if (!rows.length) return Array(12).fill(null);
 
-  const latest: Record<string, string> = {};
-  const result: Record<string, number> = {};
-  for (const row of data ?? []) {
-    if (!(row.route_id in latest)) latest[row.route_id] = row.collected_at;
-    if (row.collected_at !== latest[row.route_id]) continue;
-    if (!(row.route_id in result) || row.price_brl < result[row.route_id]) {
-      result[row.route_id] = row.price_brl;
+  const byMonth: { fare: number; seats: number }[][] = Array.from(
+    { length: 12 },
+    () => []
+  );
+  for (const r of rows) byMonth[r.month - 1].push({ fare: r.fare, seats: r.seats ?? 1 });
+
+  const wavg = (xs: { fare: number; seats: number }[]) =>
+    xs.reduce((a, x) => a + x.fare * x.seats, 0) /
+    (xs.reduce((a, x) => a + x.seats, 0) || 1);
+  const annual = wavg(rows);
+  return byMonth.map((m) => (m.length ? (wavg(m) / annual) * 100 : null));
+}
+
+// ---------- derivados ----------
+
+/** Pivota observacoes: menor preco por cia por dia de coleta. */
+export function dailyMinByAirline(obs: Observation[]) {
+  const byDay = new Map<string, Record<string, number>>();
+  const airlines = new Set<string>();
+  for (const o of obs) {
+    const day = o.collected_at.slice(0, 10);
+    const point = byDay.get(day) ?? {};
+    if (!(o.airline in point) || o.price_brl < point[o.airline]) {
+      point[o.airline] = o.price_brl;
     }
+    byDay.set(day, point);
+    airlines.add(o.airline);
   }
-  return result;
+  const points = [...byDay.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([time, v]) => ({ time, ...v }));
+  return { points, airlines: [...airlines].sort() };
+}
+
+/** Menor preco do dia considerando todas as cias (serie da rota). */
+export function dailyRouteMin(obs: Observation[]): { day: string; price: number }[] {
+  const byDay = new Map<string, number>();
+  for (const o of obs) {
+    const day = o.collected_at.slice(0, 10);
+    const cur = byDay.get(day);
+    if (cur === undefined || o.price_brl < cur) byDay.set(day, o.price_brl);
+  }
+  return [...byDay.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([day, price]) => ({ day, price }));
+}
+
+function percentile(sorted: number[], p: number) {
+  if (!sorted.length) return 0;
+  const i = (sorted.length - 1) * p;
+  const lo = Math.floor(i);
+  const hi = Math.ceil(i);
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo);
+}
+
+/** Distribuicao dos ultimos 28 dias + status do preco de hoje. */
+export function routeStats(daily: { day: string; price: number }[]): RouteStats | null {
+  if (!daily.length) return null;
+  const cutoff = daily.at(-1)!.day;
+  const cutoffDate = new Date(`${cutoff}T00:00:00`);
+  cutoffDate.setDate(cutoffDate.getDate() - STATS_WINDOW_DAYS);
+  const window = daily.filter((d) => d.day >= cutoffDate.toISOString().slice(0, 10));
+  const values = window.map((d) => d.price).sort((a, b) => a - b);
+  const todayMin = daily.at(-1)!.price;
+  const median = percentile(values, 0.5);
+  const p25 = percentile(values, 0.25);
+  const p75 = percentile(values, 0.75);
+  const diffPct = median ? ((todayMin - median) / median) * 100 : null;
+
+  let status: RouteStatus = "coletando";
+  if (daily.length >= MIN_POINTS) {
+    status = todayMin < p25 ? "abaixo" : todayMin > p75 ? "acima" : "normal";
+  }
+
+  return {
+    n: daily.length,
+    min: values[0],
+    p25,
+    median,
+    p75,
+    max: values.at(-1)!,
+    todayMin,
+    diffPct,
+    status,
+    firstDay: daily[0].day,
+    lastDay: daily.at(-1)!.day,
+  };
+}
+
+/** Curva de antecedencia: media do menor preco diario por lead. */
+export function advanceCurve(obs: Observation[]): { lead: number; avg: number }[] {
+  return LEAD_TIMES.map((lead) => {
+    const daily = dailyRouteMin(obs.filter((o) => o.lead_days === lead));
+    if (!daily.length) return { lead, avg: 0 };
+    return {
+      lead,
+      avg: daily.reduce((a, d) => a + d.price, 0) / daily.length,
+    };
+  }).filter((b) => b.avg > 0);
+}
+
+/** Tabela por cia: menor preco na coleta mais recente vs mediana 28d. */
+export function airlineTable(obs: Observation[]) {
+  const byAirline = new Map<string, { day: string; price: number; stops: number | null }[]>();
+  for (const o of obs) {
+    const day = o.collected_at.slice(0, 10);
+    const rows = byAirline.get(o.airline) ?? [];
+    const existing = rows.find((r) => r.day === day);
+    if (existing) {
+      if (o.price_brl < existing.price) {
+        existing.price = o.price_brl;
+        existing.stops = o.stops;
+      }
+    } else {
+      rows.push({ day, price: o.price_brl, stops: o.stops });
+    }
+    byAirline.set(o.airline, rows);
+  }
+  return [...byAirline.entries()]
+    .map(([airline, rows]) => {
+      rows.sort((a, b) => a.day.localeCompare(b.day));
+      const cutoff = new Date(`${rows.at(-1)!.day}T00:00:00`);
+      cutoff.setDate(cutoff.getDate() - STATS_WINDOW_DAYS);
+      const window = rows
+        .filter((r) => r.day >= cutoff.toISOString().slice(0, 10))
+        .map((r) => r.price)
+        .sort((a, b) => a - b);
+      const median = percentile(window, 0.5);
+      const today = rows.at(-1)!;
+      return {
+        airline,
+        today: today.price,
+        stops: today.stops,
+        median,
+        diffPct: median ? ((today.price - median) / median) * 100 : null,
+      };
+    })
+    .sort((a, b) => a.today - b.today);
+}
+
+/** Resumo por rota para a home: stats + sparkline de uma serie padrao. */
+export function summarizeRoutes(
+  routes: Route[],
+  obs: Observation[],
+  trip: string = "round-trip",
+  lead: number = 30
+) {
+  const byRoute = new Map<string, Observation[]>();
+  for (const o of obs) {
+    if (o.trip_type !== trip || o.lead_days !== lead) continue;
+    const rows = byRoute.get(o.route_id) ?? [];
+    rows.push(o);
+    byRoute.set(o.route_id, rows);
+  }
+  return routes.map((r) => {
+    const routeObs = byRoute.get(r.id) ?? [];
+    const daily = dailyRouteMin(routeObs);
+    return {
+      route: r,
+      stats: routeStats(daily),
+      spark: daily.map((d) => d.price),
+    };
+  });
 }
 
 export function formatBRL(value: number) {
@@ -93,4 +393,9 @@ export function formatBRL(value: number) {
     currency: "BRL",
     maximumFractionDigits: 0,
   });
+}
+
+export function formatDay(d: string) {
+  const [, m, day] = d.split("-");
+  return `${day}/${m}`;
 }

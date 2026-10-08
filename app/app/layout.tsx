@@ -1,20 +1,34 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  IBM_Plex_Mono,
+  IBM_Plex_Sans,
+} from "next/font/google";
 import "./globals.css";
+import { BottomNav } from "@/components/BottomNav";
+import { Header } from "@/components/Header";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "Monitor de passagens",
-  description: "Histórico de tarifas aéreas e alertas de promoção",
+  title: "Monitor de Passagens",
+  description:
+    "Histórico de tarifas aéreas, faixa normal de preço e alertas de promoção nas principais rotas saindo do Brasil.",
 };
 
 export default function RootLayout({
@@ -23,11 +37,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="dark">
+    <html lang="pt-BR">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-neutral-950 text-neutral-100 antialiased`}
+        className={`${bricolage.variable} ${plexSans.variable} ${plexMono.variable} bg-fundo font-sans text-tinta antialiased`}
       >
+        <Header />
         {children}
+        <BottomNav />
       </body>
     </html>
   );

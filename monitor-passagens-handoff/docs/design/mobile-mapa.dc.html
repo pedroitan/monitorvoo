@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>App — Mapa de rotas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#0E1A2B}
+a{color:#2457C5}a:hover{color:#163A8A}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.disp{font-family:'Bricolage Grotesque','IBM Plex Sans',sans-serif}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #0A1322; border-radius: 44px">
+
+<svg viewBox="0 0 390 480" style="position: absolute; left: 0; top: 0; width: 390px; height: 480px" role="img" aria-label="Mapa das rotas monitoradas, coloridas pela situação do preço">
+<defs><pattern id="pontos" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#1C2A42"/></pattern></defs>
+<rect width="390" height="480" fill="url(#pontos)"/>
+<g fill="none" stroke-width="2" stroke-linecap="round">
+<path d="M247 348 Q160 230 130 135" stroke="#6F93D9" stroke-opacity="0.7"/>
+<path d="M247 348 Q215 380 206 417" stroke="#6F93D9" stroke-opacity="0.7"/>
+<path d="M247 348 Q150 400 70 480" stroke="#6F93D9" stroke-opacity="0.7"/>
+<path d="M247 348 Q170 200 175 0" stroke="#6F93D9" stroke-opacity="0.7"/>
+<path d="M316 239 Q275 235 235 269" stroke="#6F93D9" stroke-opacity="0.7"/>
+<path d="M247 348 Q330 260 347 188" stroke="#4A5B7A"/>
+<path d="M247 348 Q340 150 390 120" stroke="#4A5B7A"/>
+<path d="M247 348 Q300 200 316 142" stroke="#F07B3F" stroke-width="2.5"/>
+<path d="M276 343 Q310 295 316 239" stroke="#F07B3F" stroke-width="2.5"/>
+<path d="M247 348 Q300 300 316 239" stroke="#F07B3F" stroke-width="2.5"/>
+<path d="M316 239 Q380 150 390 60" stroke="#F07B3F" stroke-width="3"/>
+</g>
+<g fill="#FFFFFF">
+<circle cx="316" cy="239" r="5"/><circle cx="247" cy="348" r="5"/><circle cx="276" cy="343" r="3.5"/><circle cx="235" cy="269" r="3.5"/><circle cx="347" cy="188" r="3.5"/><circle cx="316" cy="142" r="3.5"/><circle cx="130" cy="135" r="3.5"/><circle cx="206" cy="417" r="3.5"/>
+</g>
+<g class="mono" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#C3CDDB">
+<text x="326" y="243">SSA</text><text x="214" y="364">GRU</text><text x="282" y="358">GIG</text><text x="200" y="266">BSB</text><text x="355" y="192">REC</text><text x="324" y="139">FOR</text><text x="98" y="131">MAO</text><text x="214" y="430">POA</text>
+</g>
+</svg>
+
+<div class="mono" style="position: absolute; right: 16px; top: 74px; background: #F07B3F; color: #0A1322; font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 99px">LIS ↗</div>
+<div class="mono" style="position: absolute; left: 186px; top: 58px; background: #22314D; color: #DCE3EE; font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 99px">MIA ↑</div>
+<div class="mono" style="position: absolute; right: 16px; top: 132px; background: #22314D; color: #DCE3EE; font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 99px">CDG →</div>
+
+<div style="position: absolute; left: 16px; top: 54px; display: flex; align-items: center; gap: 8px; background: #16223A; color: #FFFFFF; padding: 8px 12px; border-radius: 99px; font-weight: 600; font-size: 14px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F07B3F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>Monitor</div>
+
+<div style="position: absolute; left: 16px; top: 380px; display: flex; flex-direction: column; gap: 6px; background: #16223AE6; padding: 10px 12px; border-radius: 12px; font-size: 12px; color: #DCE3EE">
+<span style="display: flex; align-items: center; gap: 8px"><span style="width: 16px; height: 3px; border-radius: 2px; background: #F07B3F"></span>Abaixo do normal</span>
+<span style="display: flex; align-items: center; gap: 8px"><span style="width: 16px; height: 3px; border-radius: 2px; background: #6F93D9"></span>Normal</span>
+<span style="display: flex; align-items: center; gap: 8px"><span style="width: 16px; height: 3px; border-radius: 2px; background: #4A5B7A"></span>Acima do normal</span>
+</div>
+
+<section aria-labelledby="rotas-h" style="position: absolute; left: 0; right: 0; top: 452px; bottom: 0; background: #FFFFFF; border-radius: 28px 28px 44px 44px; padding: 10px 18px 0; display: flex; flex-direction: column; gap: 14px">
+<div style="width: 40px; height: 5px; border-radius: 99px; background: #D5DAE1; align-self: center"></div>
+<div style="display: flex; justify-content: space-between; align-items: center">
+<h1 id="rotas-h" class="disp" style="margin: 0; font-size: 32px; font-weight: 700">Rotas</h1>
+<a href="Alertas.dc.html" aria-label="Meus alertas" style="width: 44px; height: 44px; border-radius: 99px; background: #F2F3F0; display: flex; align-items: center; justify-content: center; color: #0E1A2B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></a>
+</div>
+<div style="display: flex; gap: 8px; overflow: hidden">
+<button style="flex: 0 0 auto; height: 40px; padding: 0 14px; border-radius: 12px; border: 0; background: #F2F3F0; font: inherit; font-weight: 600; color: #0E1A2B">Saindo de SSA ▾</button>
+<button style="flex: 0 0 auto; height: 40px; padding: 0 14px; border-radius: 12px; border: 0; background: #F2F3F0; font: inherit; color: #0E1A2B">Ida e volta</button>
+<button style="flex: 0 0 auto; height: 40px; padding: 0 14px; border-radius: 12px; border: 0; background: #F2F3F0; font: inherit; color: #0E1A2B">Todas as cias ▾</button>
+</div>
+<div style="display: flex; flex-direction: column">
+<sc-for list="{{rotas}}" as="r" hint-placeholder-count="3">
+<a href="AppRota.dc.html" style="display: grid; grid-template-columns: 68px 1fr; gap: 10px; padding: 12px 0; border-top: 1px solid #EEF0F3; text-decoration: none; color: #0E1A2B">
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center">
+<span class="mono" style="font-size: 24px; font-weight: 600; color: {{r.corNum}}">{{r.num}}</span>
+<span style="font-size: 10px; letter-spacing: 0.08em; color: #556274; font-weight: 600">VS NORMAL</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 3px">
+<div style="display: flex; justify-content: space-between; font-size: 13px"><span style="color: #556274">{{r.cia}}</span><span style="font-weight: 600; color: {{r.corStatus}}">{{r.status}}</span></div>
+<div style="font-size: 17px; font-weight: 600">{{r.nome}}</div>
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span class="mono" style="font-size: 13px; color: #3B4759">{{r.codigo}}</span><span class="mono" style="font-size: 17px; font-weight: 600">{{r.preco}}</span></div>
+</div>
+</a>
+</sc-for>
+</div>
+</section>
+
+<nav aria-label="Seções" style="position: absolute; left: 16px; bottom: 22px; display: flex; gap: 10px; align-items: center">
+<div style="display: flex; background: #FFFFFFF0; border: 1px solid #E1E4E8; border-radius: 99px; padding: 4px; box-shadow: 0 6px 20px #0A132226">
+<a href="AppMapa.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 84px; padding: 6px 0; border-radius: 99px; background: #EEF0F3; color: #0E1A2B; text-decoration: none; font-size: 11px; font-weight: 600"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/></svg>Rotas</a>
+<a href="AppPromocoes.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 84px; padding: 6px 0; border-radius: 99px; color: #3B4759; text-decoration: none; font-size: 11px; font-weight: 500"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>Promoções</a>
+<a href="Alertas.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 84px; padding: 6px 0; border-radius: 99px; color: #3B4759; text-decoration: none; font-size: 11px; font-weight: 500"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>Alertas</a>
+</div>
+<button aria-label="Buscar rota" style="width: 58px; height: 58px; border-radius: 99px; border: 1px solid #E1E4E8; background: #FFFFFFF0; box-shadow: 0 6px 20px #0A132226; display: flex; align-items: center; justify-content: center; color: #2457C5"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var baixo = { corNum: '#B5410F', status: 'Abaixo do normal', corStatus: '#B5410F' };
+    var normal = { corNum: '#0E1A2B', status: 'Normal', corStatus: '#3B4759' };
+    function r(num, cia, nome, codigo, preco, s) { return Object.assign({ num: num, cia: cia, nome: nome, codigo: codigo, preco: preco }, s); }
+    return {
+      rotas: [
+        r('−20%', 'LATAM · direto', 'Salvador → Lisboa', 'SSA → LIS', 'R$ 2.960', baixo),
+        r('−27%', 'LATAM · direto', 'São Paulo → Salvador', 'GRU → SSA', 'R$ 412', baixo),
+        r('+2%', 'GOL · direto', 'Salvador → Brasília', 'SSA → BSB', 'R$ 689', normal)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

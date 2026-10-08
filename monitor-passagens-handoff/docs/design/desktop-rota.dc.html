@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Salvador → Lisboa — Monitor de Passagens</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0;background:#F2F3F0;color:#0E1A2B;font-family:'IBM Plex Sans',system-ui,sans-serif}
+a{color:#2457C5}a:hover{color:#163A8A}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.disp{font-family:'Bricolage Grotesque','IBM Plex Sans',sans-serif}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F2F3F0">
+
+<header style="background: #0E1A2B; color: #FFFFFF">
+<div style="max-width: 1240px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap">
+<a href="Main.dc.html" class="disp" style="color: #FFFFFF; text-decoration: none; font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F07B3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+Monitor de Passagens</a>
+<nav aria-label="Principal" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+<a href="Rota.dc.html" aria-current="page" style="color: #FFFFFF; text-decoration: underline; text-underline-offset: 6px; padding: 12px 14px; font-weight: 600">Rotas</a>
+<a href="Promocoes.dc.html" style="color: #DCE3EE; text-decoration: none; padding: 12px 14px; font-weight: 500">Promoções</a>
+<a href="Alertas.dc.html" style="color: #DCE3EE; text-decoration: none; padding: 12px 14px; font-weight: 500">Meus alertas</a>
+<a href="Alertas.dc.html" style="color: #0E1A2B; background: #FFFFFF; text-decoration: none; padding: 12px 18px; border-radius: 8px; font-weight: 600">Entrar</a>
+</nav>
+</div>
+</header>
+
+<main style="max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 28px">
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<nav aria-label="Caminho" style="font-size: 14px; color: #556274"><a href="Main.dc.html">Rotas</a> / Internacionais / Salvador – Lisboa</nav>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
+<div>
+<h1 class="disp" style="margin: 0; font-size: 44px; font-weight: 700; display: flex; align-items: center; gap: 14px; flex-wrap: wrap"><span class="mono" style="font-size: 40px">SSA</span><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0E1A2B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 12h16"/><path d="M14 6l6 6-6 6"/></svg><span class="mono" style="font-size: 40px">LIS</span></h1>
+<p style="margin: 6px 0 0; color: #3B4759">Salvador → Lisboa · ida e volta, 7 dias · tarifa básica, 1 adulto</p>
+</div>
+<a href="Alertas.dc.html" style="height: 48px; display: flex; align-items: center; gap: 8px; padding: 0 20px; background: #0E1A2B; color: #FFFFFF; border-radius: 8px; text-decoration: none; font-weight: 600">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+Criar alerta para esta rota</a>
+</div>
+</div>
+
+<div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center">
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center" role="group" aria-label="Comprando com antecedência de">
+<span style="font-size: 14px; font-weight: 600; color: #3B4759; margin-right: 4px">Antecedência</span>
+<button style="height: 44px; min-width: 52px; padding: 0 12px; border-radius: 8px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">7d</button>
+<button style="height: 44px; min-width: 52px; padding: 0 12px; border-radius: 8px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">14d</button>
+<button style="height: 44px; min-width: 52px; padding: 0 12px; border-radius: 8px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">30d</button>
+<button aria-pressed="true" style="height: 44px; min-width: 52px; padding: 0 12px; border-radius: 8px; border: 1px solid #0E1A2B; background: #0E1A2B; color: #FFFFFF; font: inherit; font-weight: 600">60d</button>
+<button style="height: 44px; min-width: 52px; padding: 0 12px; border-radius: 8px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">90d</button>
+<button style="height: 44px; min-width: 52px; padding: 0 12px; border-radius: 8px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">180d</button>
+</div>
+<div style="display: flex; gap: 6px; align-items: center" role="group" aria-label="Período">
+<span style="font-size: 14px; font-weight: 600; color: #3B4759; margin-right: 4px">Período</span>
+<button aria-pressed="true" style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #0E1A2B; background: #0E1A2B; color: #FFFFFF; font: inherit; font-weight: 600">30 dias</button>
+<button style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">90 dias</button>
+<button style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #C7CDD6; background: #FFFFFF; font: inherit">1 ano</button>
+</div>
+</div>
+
+<section aria-label="Situação do preço hoje" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px">
+<div style="background: #0E1A2B; color: #FFFFFF; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 10px">
+<span style="align-self: flex-start; background: #D9581C; color: #FFFFFF; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 99px">Bom momento para comprar</span>
+<div class="mono" style="font-size: 44px; font-weight: 600">R$ 2.960</div>
+<div style="color: #C3CDDB; line-height: 1.45">Menor preço hoje, na LATAM. Está <strong style="color: #FFFFFF">20% abaixo</strong> da mediana dos últimos 28 dias.</div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E1E4E8; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-weight: 600">Onde o preço de hoje está</div>
+<div style="position: relative; height: 56px">
+<div style="position: absolute; left: 0; right: 0; top: 22px; height: 10px; border-radius: 99px; background: #E3E7EC"></div>
+<div style="position: absolute; left: 30%; width: 38%; top: 22px; height: 10px; border-radius: 99px; background: #9DB3DE"></div>
+<div style="position: absolute; left: 12%; top: 12px; width: 4px; height: 30px; border-radius: 2px; background: #D9581C"></div>
+<div class="mono" style="position: absolute; left: 7%; top: -6px; font-size: 13px; font-weight: 600; color: #B5410F">hoje</div>
+<div class="mono" style="position: absolute; left: 0; top: 40px; font-size: 12px; color: #556274">R$ 2.700</div>
+<div class="mono" style="position: absolute; left: 30%; top: 40px; font-size: 12px; color: #556274">R$ 3.420</div>
+<div class="mono" style="position: absolute; left: 61%; top: 40px; font-size: 12px; color: #556274">R$ 3.950</div>
+<div class="mono" style="position: absolute; right: 0; top: 40px; font-size: 12px; color: #556274">R$ 4.600</div>
+</div>
+<div style="font-size: 14px; color: #3B4759">Faixa azul = faixa normal (metade central dos preços dos últimos 28 dias).</div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E1E4E8; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-weight: 600">Promoção detectada</div>
+<div style="display: flex; align-items: baseline; gap: 10px"><span class="mono" style="font-size: 30px; font-weight: 600; color: #B5410F">−31%</span><span style="color: #3B4759">LATAM, desde 05 out</span></div>
+<div style="font-size: 14px; color: #3B4759; line-height: 1.45">Queda simultânea em 14 rotas da companhia. Campanhas parecidas da LATAM duraram em média 4 dias.</div>
+<a href="Promocoes.dc.html" style="font-weight: 600; font-size: 15px">Ver no calendário</a>
+</div>
+</section>
+
+<section aria-labelledby="hist-h" style="background: #FFFFFF; border: 1px solid #E1E4E8; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap">
+<div>
+<h2 id="hist-h" class="disp" style="margin: 0; font-size: 24px; font-weight: 700">Menor preço por dia de coleta</h2>
+<p style="margin: 4px 0 0; color: #556274; font-size: 14px">Voos partindo 60 dias depois de cada coleta</p>
+</div>
+<div style="display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px">
+<span style="display: flex; align-items: center; gap: 8px"><span style="width: 18px; height: 3px; background: #2457C5; border-radius: 2px"></span>LATAM</span>
+<span style="display: flex; align-items: center; gap: 8px"><span style="width: 18px; height: 3px; background: #0B7A6C; border-radius: 2px"></span>TAP</span>
+<span style="display: flex; align-items: center; gap: 8px"><span style="width: 18px; height: 3px; background: #7B3FB0; border-radius: 2px"></span>Azul (com conexão)</span>
+<span style="display: flex; align-items: center; gap: 8px"><span style="width: 16px; height: 12px; background: #DCE5F5; border-radius: 2px"></span>Faixa normal</span>
+<span style="display: flex; align-items: center; gap: 8px"><span style="width: 16px; height: 12px; background: #FBE3D4; border-radius: 2px"></span>Promoção</span>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 76px 1fr; gap: 8px">
+<div class="mono" style="display: flex; flex-direction: column; justify-content: space-between; font-size: 12px; color: #556274; height: 320px; text-align: right">
+<span>R$ 5.000</span><span>R$ 4.250</span><span>R$ 3.500</span><span>R$ 2.750</span><span>R$ 2.000</span>
+</div>
+<div style="position: relative; height: 320px">
+<svg viewBox="0 0 1000 320" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 320px" role="img" aria-label="Gráfico do menor preço por companhia nos últimos 30 dias">
+<line x1="0" y1="0" x2="1000" y2="0" stroke="#EEF0F3" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<line x1="0" y1="80" x2="1000" y2="80" stroke="#EEF0F3" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<line x1="0" y1="160" x2="1000" y2="160" stroke="#EEF0F3" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<line x1="0" y1="240" x2="1000" y2="240" stroke="#EEF0F3" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<line x1="0" y1="320" x2="1000" y2="320" stroke="#C7CDD6" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<rect x="500" y="0" width="172" height="320" fill="#FBE3D4"/>
+<rect x="914" y="0" width="86" height="320" fill="#FBE3D4"/>
+<rect x="0" y="112" width="1000" height="56" fill="#DCE5F5" fill-opacity="0.8"/>
+<polyline fill="none" stroke="#7B3FB0" stroke-width="2.5" vector-effect="non-scaling-stroke" points="0,88 34,92 69,84 103,90 138,86 172,94 207,88 241,82 276,90 310,86 345,92 379,88 414,84 448,90 483,96 517,88 552,92 586,86 621,90 655,84 690,88 724,92 759,86 793,90 828,84 862,92 897,88 931,90 966,86 1000,92"/>
+<polyline fill="none" stroke="#0B7A6C" stroke-width="2.5" vector-effect="non-scaling-stroke" points="0,148 34,150 69,144 103,152 138,146 172,150 207,142 241,148 276,145 310,150 345,147 379,152 414,146 448,150 483,148 517,232 552,240 586,236 621,230 655,150 690,146 724,152 759,148 793,144 828,150 862,147 897,152 931,148 966,150 1000,146"/>
+<polyline fill="none" stroke="#2457C5" stroke-width="2.5" vector-effect="non-scaling-stroke" points="0,120 34,126 69,118 103,124 138,130 172,122 207,128 241,120 276,126 310,118 345,124 379,128 414,120 448,126 483,122 517,128 552,124 586,120 621,126 655,130 690,122 724,128 759,124 793,120 828,126 862,122 897,128 931,205 966,214 1000,218"/>
+</svg>
+<div style="position: absolute; left: 51%; top: 8px; background: #FFFFFF; border: 1px solid #F0C3A6; border-radius: 6px; padding: 4px 8px; font-size: 12px; font-weight: 600; color: #8E3510">TAP −28% · 22–26 set</div>
+<div style="position: absolute; right: 2%; top: 8px; background: #FFFFFF; border: 1px solid #F0C3A6; border-radius: 6px; padding: 4px 8px; font-size: 12px; font-weight: 600; color: #8E3510">LATAM −31%</div>
+<div class="mono" style="position: absolute; right: -4px; top: 222px; transform: translateX(100%); font-size: 12px; font-weight: 600; color: #2457C5; padding-left: 6px"></div>
+</div>
+<div></div>
+<div class="mono" style="display: flex; justify-content: space-between; font-size: 12px; color: #556274"><span>07 set</span><span>14 set</span><span>21 set</span><span>28 set</span><span>06 out</span></div>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px">
+<section aria-labelledby="ant-h" style="background: #FFFFFF; border: 1px solid #E1E4E8; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div>
+<h2 id="ant-h" class="disp" style="margin: 0; font-size: 22px; font-weight: 700">Quando comprar</h2>
+<p style="margin: 4px 0 0; color: #556274; font-size: 14px">Preço médio por antecedência da compra, últimos 90 dias</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; align-items: end; height: 220px">
+<sc-for list="{{antecedencia}}" as="a" hint-placeholder-count="6">
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%">
+<span class="mono" style="font-size: 12px; font-weight: 600; color: {{a.corTexto}}">{{a.valor}}</span>
+<div style="width: 100%; max-width: 56px; height: {{a.altura}}; background: {{a.cor}}; border-radius: 6px 6px 0 0"></div>
+</div>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; text-align: center; font-size: 13px; color: #3B4759; margin-top: -8px">
+<span>7 dias</span><span>14 dias</span><span>30 dias</span><span>60 dias</span><span>90 dias</span><span>180 dias</span>
+</div>
+<p style="margin: 0; font-size: 15px; line-height: 1.45">Nesta rota, comprar com <strong>cerca de 2 meses</strong> de antecedência costuma sair mais barato.</p>
+</section>
+
+<section aria-labelledby="saz-h" style="background: #FFFFFF; border: 1px solid #E1E4E8; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div>
+<h2 id="saz-h" class="disp" style="margin: 0; font-size: 22px; font-weight: 700">Época do ano</h2>
+<p style="margin: 4px 0 0; color: #556274; font-size: 14px">Tarifa média vendida por mês de viagem, comparada à média anual (ANAC)</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; align-items: end; height: 220px">
+<sc-for list="{{meses}}" as="m" hint-placeholder-count="12">
+<div style="display: flex; flex-direction: column; justify-content: flex-end; height: 100%">
+<div style="height: {{m.altura}}; background: {{m.cor}}; border-radius: 4px 4px 0 0"></div>
+</div>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; text-align: center; font-size: 12px; color: #3B4759; margin-top: -8px">
+<span>jan</span><span>fev</span><span>mar</span><span>abr</span><span>mai</span><span>jun</span><span>jul</span><span>ago</span><span>set</span><span>out</span><span>nov</span><span>dez</span>
+</div>
+<p style="margin: 0; font-size: 15px; line-height: 1.45">Meses em azul-escuro ficam acima da média; <strong>abril, maio e novembro</strong> costumam ser os mais baratos.</p>
+</section>
+</div>
+
+<section aria-labelledby="cia-h" style="background: #FFFFFF; border: 1px solid #E1E4E8; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<h2 id="cia-h" class="disp" style="margin: 0; font-size: 22px; font-weight: 700">Por companhia hoje</h2>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 760px; border-collapse: collapse; font-size: 15px">
+<thead>
+<tr style="text-align: left; color: #556274; font-size: 13px">
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600">Companhia</th>
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600; text-align: right">Menor hoje</th>
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600; text-align: right">Mediana 28 dias</th>
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600; text-align: right">Diferença</th>
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600">Voo</th>
+<th scope="col" style="padding: 10px 12px; border-bottom: 1px solid #D5DAE1; font-weight: 600"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Ação</span></th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{cias}}" as="c" hint-placeholder-count="3">
+<tr>
+<td style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3"><span style="display: inline-flex; align-items: center; gap: 10px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 99px; background: {{c.cor}}"></span>{{c.nome}}</span></td>
+<td class="mono" style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3; text-align: right; font-weight: 600">{{c.hoje}}</td>
+<td class="mono" style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3; text-align: right; color: #3B4759">{{c.mediana}}</td>
+<td class="mono" style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3; text-align: right; font-weight: 600; color: {{c.corDif}}">{{c.dif}}</td>
+<td style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3; color: #3B4759">{{c.voo}}</td>
+<td style="padding: 14px 12px; border-bottom: 1px solid #EEF0F3; text-align: right"><a href="https://example.com" style="display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 14px; border: 1px solid #C7CDD6; border-radius: 8px; text-decoration: none; color: #0E1A2B; font-weight: 600; font-size: 14px">Ver no site<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg></a></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+<p style="margin: 0; font-size: 13px; color: #556274">Preços coletados hoje às 06:12. O valor final pode mudar no site da companhia. Não vendemos passagens.</p>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var ant = [['R$ 4.380', 4380], ['R$ 3.720', 3720], ['R$ 3.150', 3150], ['R$ 2.980', 2980], ['R$ 3.040', 3040], ['R$ 3.290', 3290]];
+    var max = 4380;
+    var antecedencia = ant.map(function (a) {
+      var melhor = a[1] === 2980;
+      return { valor: a[0], altura: Math.round((a[1] / max) * 180) + 'px', cor: melhor ? '#D9581C' : '#9DB3DE', corTexto: melhor ? '#B5410F' : '#3B4759' };
+    });
+    var idx = [118, 104, 96, 88, 86, 102, 124, 112, 95, 98, 89, 128];
+    var meses = idx.map(function (v) { return { altura: Math.round((v / 128) * 200) + 'px', cor: v > 100 ? '#163A8A' : '#9DB3DE' }; });
+    return {
+      antecedencia: antecedencia,
+      meses: meses,
+      cias: [
+        { nome: 'LATAM', cor: '#2457C5', hoje: 'R$ 2.960', mediana: 'R$ 3.690', dif: '−20%', corDif: '#B5410F', voo: 'Direto · 9h40' },
+        { nome: 'TAP', cor: '#0B7A6C', hoje: 'R$ 3.630', mediana: 'R$ 3.640', dif: '0%', corDif: '#3B4759', voo: 'Direto · 9h25' },
+        { nome: 'Azul', cor: '#7B3FB0', hoje: 'R$ 4.140', mediana: 'R$ 4.180', dif: '−1%', corDif: '#3B4759', voo: '1 conexão (VCP) · 15h10' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Início — Monitor de Passagens</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0;background:#F2F3F0;color:#0E1A2B;font-family:'IBM Plex Sans',system-ui,sans-serif}
+a{color:#2457C5}a:hover{color:#163A8A}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.disp{font-family:'Bricolage Grotesque','IBM Plex Sans',sans-serif}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F2F3F0">
+
+<header style="background: #0E1A2B; color: #FFFFFF">
+<div style="max-width: 1240px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap">
+<a href="Main.dc.html" class="disp" style="color: #FFFFFF; text-decoration: none; font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F07B3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+Monitor de Passagens</a>
+<nav aria-label="Principal" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+<a href="Rota.dc.html" style="color: #DCE3EE; text-decoration: none; padding: 12px 14px; font-weight: 500">Rotas</a>
+<a href="Promocoes.dc.html" style="color: #DCE3EE; text-decoration: none; padding: 12px 14px; font-weight: 500">Promoções</a>
+<a href="Alertas.dc.html" style="color: #DCE3EE; text-decoration: none; padding: 12px 14px; font-weight: 500">Meus alertas</a>
+<a href="Alertas.dc.html" style="color: #0E1A2B; background: #FFFFFF; text-decoration: none; padding: 12px 18px; border-radius: 8px; font-weight: 600">Entrar</a>
+</nav>
+</div>
+</header>
+
+<section style="background: #0E1A2B; color: #FFFFFF; padding: 56px 0 72px">
+<div style="max-width: 1240px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 28px">
+<h1 class="disp" style="margin: 0; font-size: 56px; line-height: 1.05; font-weight: 700; max-width: 820px">Saiba se o preço da passagem está bom antes de comprar.</h1>
+<p style="margin: 0; font-size: 19px; line-height: 1.5; color: #C3CDDB; max-width: 680px">Acompanhamos diariamente as principais rotas saindo do Brasil e mostramos o histórico, a faixa normal de preço e quando cada companhia entra em promoção.</p>
+<form style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; background: #FFFFFF; padding: 16px; border-radius: 12px; max-width: 940px">
+<div style="display: flex; flex-direction: column; gap: 6px; flex: 1 1 220px">
+<label for="origem" style="font-size: 13px; font-weight: 600; color: #3B4759">Origem</label>
+<input id="origem" value="Salvador (SSA)" style="height: 48px; border: 1px solid #C7CDD6; border-radius: 8px; padding: 0 14px; font: inherit; font-size: 16px; color: #0E1A2B">
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; flex: 1 1 220px">
+<label for="destino" style="font-size: 13px; font-weight: 600; color: #3B4759">Destino</label>
+<input id="destino" value="Lisboa (LIS)" style="height: 48px; border: 1px solid #C7CDD6; border-radius: 8px; padding: 0 14px; font: inherit; font-size: 16px; color: #0E1A2B">
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; flex: 0 1 180px">
+<label for="tipo" style="font-size: 13px; font-weight: 600; color: #3B4759">Viagem</label>
+<select id="tipo" style="height: 48px; border: 1px solid #C7CDD6; border-radius: 8px; padding: 0 12px; font: inherit; font-size: 16px; color: #0E1A2B; background: #FFFFFF">
+<option>Ida e volta (7 dias)</option>
+<option>Só ida</option>
+</select>
+</div>
+<a href="Rota.dc.html" style="height: 48px; display: flex; align-items: center; padding: 0 24px; background: #D9581C; color: #FFFFFF; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px">Ver histórico</a>
+</form>
+</div>
+</section>
+
+<main style="max-width: 1240px; margin: 0 auto; padding: 48px 24px 64px; display: flex; flex-direction: column; gap: 56px">
+
+<section aria-labelledby="promo-h" style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap">
+<h2 id="promo-h" class="disp" style="margin: 0; font-size: 30px; font-weight: 700">Promoções em andamento</h2>
+<a href="Promocoes.dc.html" style="font-weight: 600">Ver calendário completo</a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px">
+<article style="background: #FFFFFF; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; border: 1px solid #E1E4E8">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<span style="font-weight: 600; font-size: 18px">LATAM</span>
+<span style="background: #FCE8DC; color: #8E3510; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 99px">Em andamento</span>
+</div>
+<div style="display: flex; gap: 24px">
+<div><div class="mono" style="font-size: 30px; font-weight: 600; color: #B5410F">−31%</div><div style="font-size: 13px; color: #556274">desconto médio</div></div>
+<div><div class="mono" style="font-size: 30px; font-weight: 600">14</div><div style="font-size: 13px; color: #556274">rotas afetadas</div></div>
+</div>
+<div style="font-size: 14px; color: #3B4759">Desde 05 out · nacionais saindo de GRU e SSA</div>
+</article>
+<article style="background: #FFFFFF; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; border: 1px solid #E1E4E8">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<span style="font-weight: 600; font-size: 18px">Azul</span>
+<span style="background: #FCE8DC; color: #8E3510; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 99px">Em andamento</span>
+</div>
+<div style="display: flex; gap: 24px">
+<div><div class="mono" style="font-size: 30px; font-weight: 600; color: #B5410F">−24%</div><div style="font-size: 13px; color: #556274">desconto médio</div></div>
+<div><div class="mono" style="font-size: 30px; font-weight: 600">9</div><div style="font-size: 13px; color: #556274">rotas afetadas</div></div>
+</div>
+<div style="font-size: 14px; color: #3B4759">Desde 06 out · saindo de VCP</div>
+</article>
+<article style="background: #FFFFFF; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; border: 1px solid #E1E4E8">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<span style="font-weight: 600; font-size: 18px">TAP</span>
+<span style="background: #E8EBEF; color: #3B4759; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 99px">Encerrada</span>
+</div>
+<div style="display: flex; gap: 24px">
+<div><div class="mono" style="font-size: 30px; font-weight: 600; color: #0E1A2B">−28%</div><div style="font-size: 13px; color: #556274">desconto médio</div></div>
+<div><div class="mono" style="font-size: 30px; font-weight: 600">5</div><div style="font-size: 13px; color: #556274">dias de duração</div></div>
+</div>
+<div style="font-size: 14px; color: #3B4759">22 a 26 set · Brasil–Lisboa</div>
+</article>
+</div>
+</section>
+
+<section aria-labelledby="rotas-h" style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap">
+<h2 id="rotas-h" class="disp" style="margin: 0; font-size: 30px; font-weight: 700">Rotas monitoradas</h2>
+<div style="display: flex; gap: 8px; flex-wrap: wrap" role="group" aria-label="Filtrar rotas">
+<button style="height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid #0E1A2B; background: #0E1A2B; color: #FFFFFF; font: inherit; font-weight: 600">Todas</button>
+<button style="height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid #C7CDD6; background: #FFFFFF; color: #0E1A2B; font: inherit; font-weight: 500">Nacionais</button>
+<button style="height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid #C7CDD6; background: #FFFFFF; color: #0E1A2B; font: inherit; font-weight: 500">Internacionais</button>
+<button style="height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid #C7CDD6; background: #FFFFFF; color: #0E1A2B; font: inherit; font-weight: 500">Saindo de Salvador</button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px">
+<sc-for list="{{rotas}}" as="r" hint-placeholder-count="8">
+<a href="Rota.dc.html" style="background: #FFFFFF; border: 1px solid #E1E4E8; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: #0E1A2B">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+<span class="mono" style="font-size: 18px; font-weight: 600">{{r.codigo}}</span>
+<span style="font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 99px; background: {{r.seloFundo}}; color: {{r.seloCor}}">{{r.selo}}</span>
+</div>
+<div style="font-size: 14px; color: #556274">{{r.nome}}</div>
+<svg viewBox="0 0 200 48" preserveAspectRatio="none" style="width: 100%; height: 48px" aria-hidden="true"><polyline points="{{r.linha}}" fill="none" stroke="{{r.corLinha}}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<span class="mono" style="font-size: 22px; font-weight: 600">{{r.preco}}</span>
+<span style="font-size: 13px; color: #556274">menor hoje · {{r.cia}}</span>
+</div>
+</a>
+</sc-for>
+</div>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; border-top: 1px solid #D5DAE1; padding-top: 32px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 17px">Não vendemos passagens</h3>
+<p style="margin: 0; color: #3B4759; line-height: 1.5">Monitoramos e avisamos. Na hora de comprar, você é levado ao site da companhia ou do buscador.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 17px">De onde vêm os dados</h3>
+<p style="margin: 0; color: #3B4759; line-height: 1.5">Coletas diárias em buscadores públicos e histórico oficial de tarifas da ANAC desde 2002.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 17px">Preço de referência</h3>
+<p style="margin: 0; color: #3B4759; line-height: 1.5">Tarifa básica, 1 adulto, sem bagagem despachada, em reais.</p>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1560}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var baixo = { selo: 'Abaixo do normal', seloFundo: '#FCE8DC', seloCor: '#8E3510', corLinha: '#D9581C' };
+    var normal = { selo: 'Normal', seloFundo: '#E8EBEF', seloCor: '#3B4759', corLinha: '#2457C5' };
+    var alto = { selo: 'Acima do normal', seloFundo: '#E3EAF8', seloCor: '#163A8A', corLinha: '#2457C5' };
+    function r(codigo, nome, preco, cia, linha, s) { return Object.assign({ codigo: codigo, nome: nome, preco: preco, cia: cia, linha: linha }, s); }
+    return {
+      rotas: [
+        r('SSA → LIS', 'Salvador – Lisboa', 'R$ 2.960', 'LATAM', '0,18 25,20 50,16 75,22 100,19 125,21 150,20 175,38 200,40', baixo),
+        r('GRU → SSA', 'São Paulo – Salvador', 'R$ 412', 'LATAM', '0,22 25,18 50,24 75,20 100,26 125,34 150,40 175,42 200,41', baixo),
+        r('SSA → BSB', 'Salvador – Brasília', 'R$ 689', 'GOL', '0,26 25,24 50,22 75,25 100,23 125,24 150,22 175,25 200,24', normal),
+        r('GRU → REC', 'São Paulo – Recife', 'R$ 798', 'Azul', '0,30 25,28 50,26 75,22 100,18 125,16 150,12 175,10 200,8', alto),
+        r('GRU → MIA', 'São Paulo – Miami', 'R$ 2.940', 'American', '0,24 25,26 50,23 75,25 100,22 125,24 150,26 175,23 200,25', normal),
+        r('GIG → SSA', 'Rio – Salvador', 'R$ 455', 'GOL', '0,20 25,22 50,19 75,24 100,30 125,36 150,38 175,37 200,39', baixo),
+        r('GRU → EZE', 'São Paulo – Buenos Aires', 'R$ 1.120', 'Aerolíneas', '0,25 25,23 50,26 75,24 100,25 125,22 150,24 175,26 200,23', normal),
+        r('GRU → CDG', 'São Paulo – Paris', 'R$ 4.650', 'Air France', '0,30 25,27 50,25 75,22 100,20 125,17 150,15 175,14 200,12', alto)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
