@@ -331,22 +331,30 @@ export type CalendarCell = {
   lead_days: number;
 };
 
-/** Menor preco por data de voo — base para o calendario flexivel. */
+/** Menor preco por data de voo — base para o calendario flexivel.
+ * Usa apenas o ciclo de coleta mais recente para cada data. */
 export function routeCalendar(obs: Observation[], trip: string): CalendarCell[] {
-  const byDate = new Map<string, Observation>();
+  const byDate = new Map<string, Observation[]>();
   for (const o of obs) {
     if (o.trip_type !== trip) continue;
-    const cur = byDate.get(o.flight_date);
-    if (!cur || o.price_brl < cur.price_brl) byDate.set(o.flight_date, o);
+    (byDate.get(o.flight_date) ?? byDate.set(o.flight_date, []).get(o.flight_date)!).push(o);
   }
-  return [...byDate.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([flight_date, o]) => ({
+  const cells: CalendarCell[] = [];
+  for (const [flight_date, list] of byDate.entries()) {
+    const latestDay = list
+      .map((o) => o.collected_at.slice(0, 10))
+      .sort()
+      .at(-1)!;
+    const latest = list.filter((o) => o.collected_at.slice(0, 10) === latestDay);
+    const cheapest = latest.reduce((a, b) => (a.price_brl <= b.price_brl ? a : b));
+    cells.push({
       flight_date,
-      price_brl: o.price_brl,
-      airline: o.airline,
-      lead_days: o.lead_days,
-    }));
+      price_brl: cheapest.price_brl,
+      airline: cheapest.airline,
+      lead_days: cheapest.lead_days,
+    });
+  }
+  return cells.sort((a, b) => a.flight_date.localeCompare(b.flight_date));
 }
 
 function percentile(sorted: number[], p: number) {

@@ -29,7 +29,17 @@ export function DailyFlights({ flights }: { flights: Observation[] }) {
     );
   }
 
-  const sorted = [...flights].sort((a, b) => {
+  // Deduplica: mantem a observacao mais recente de cada (numero de voo, partida).
+  const latest = new Map<string, Observation>();
+  for (const f of flights) {
+    const key = `${f.flight_number ?? f.airline}-${f.departure ?? ""}`;
+    const cur = latest.get(key);
+    if (!cur || new Date(f.collected_at).getTime() > new Date(cur.collected_at).getTime()) {
+      latest.set(key, f);
+    }
+  }
+
+  const sorted = [...latest.values()].sort((a, b) => {
     const da = a.departure ? new Date(a.departure).getTime() : Infinity;
     const db = b.departure ? new Date(b.departure).getTime() : Infinity;
     return da - db;
