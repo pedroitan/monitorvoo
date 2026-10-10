@@ -28,6 +28,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           COLLECT_DELAY_MIN: 5
           COLLECT_DELAY_MAX: 15
+          HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
         run: python -m collectors.collect
 
       - name: Detect promos

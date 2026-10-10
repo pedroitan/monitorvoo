@@ -19,4 +19,5 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
         run: python -m collectors.calendar --window 30 --trips one-way

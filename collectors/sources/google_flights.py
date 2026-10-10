@@ -7,6 +7,7 @@ Diferente do parser padrao da fast-flights, este extrai tambem o numero do voo
 from __future__ import annotations
 
 import json
+import os
 from datetime import date, timedelta
 
 from fast_flights import FlightQuery, Passengers, create_query, fetch_flights_html
@@ -14,6 +15,10 @@ from selectolax.lexbor import LexborHTMLParser
 
 SOURCE = "google_flights"
 ROUND_TRIP_DAYS = 7
+
+
+def _proxy() -> str | None:
+    return os.environ.get("HTTP_PROXY") or os.environ.get("HTTPS_PROXY") or None
 
 
 def _parse_time(value: list[int | None] | None) -> tuple[int, int]:
@@ -118,7 +123,7 @@ def fetch_calendar(
         language="pt-BR",
         currency="BRL",
     )
-    html = fetch_flights_html(query)
+    html = fetch_flights_html(query, proxy=_proxy())
     options = _parse_google_flights(html)
 
     return {
