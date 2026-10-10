@@ -52,11 +52,21 @@ def collect_route(
                         spec.origin, spec.destination, lead, trip
                     )
                     break
-                except Exception as exc:
-                    if attempt == 1:
-                        print(f"  ERRO {label}: {exc}", file=sys.stderr)
+                except RuntimeError as exc:
+                    is_rate = "no flights found" in str(exc)
+                    if attempt == 0:
+                        sleep = random.uniform(25, 55) if is_rate else random.uniform(5, 15)
+                        print(f"  retry {label} ({exc}; esperando {sleep:.0f}s)", file=sys.stderr)
+                        time.sleep(sleep)
                     else:
-                        time.sleep(random.uniform(5, 15))
+                        print(f"  ERRO {label}: {exc}", file=sys.stderr)
+                except Exception as exc:
+                    if attempt == 0:
+                        sleep = random.uniform(5, 15)
+                        print(f"  retry {label} ({exc}; esperando {sleep:.0f}s)", file=sys.stderr)
+                        time.sleep(sleep)
+                    else:
+                        print(f"  ERRO {label}: {exc}", file=sys.stderr)
             if payload is None:
                 calls += 1
                 continue
@@ -103,8 +113,8 @@ def main() -> int:
     leads = parse_csv(args.leads, int) if args.leads else None
     trips = parse_csv(args.trips) if args.trips else None
     delay = None if args.no_delay else (
-        float(os.environ.get("COLLECT_DELAY_MIN", 3)),
-        float(os.environ.get("COLLECT_DELAY_MAX", 10)),
+        float(os.environ.get("COLLECT_DELAY_MIN", 5)),
+        float(os.environ.get("COLLECT_DELAY_MAX", 15)),
     )
 
     calls = 0

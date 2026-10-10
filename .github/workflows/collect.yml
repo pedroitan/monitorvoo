@@ -2,8 +2,8 @@ name: collect
 
 on:
   schedule:
-    # 3x ao dia: 06h, 12h, 18h horario de Brasilia (UTC-3)
-    - cron: "0 9,15,21 * * *"
+    # 2x ao dia: 07h, 19h horario de Brasilia (UTC-3)
+    - cron: "0 10,22 * * *"
   workflow_dispatch:
 
 jobs:
@@ -26,6 +26,8 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          COLLECT_DELAY_MIN: 5
+          COLLECT_DELAY_MAX: 15
         run: python -m collectors.collect
 
       - name: Detect promos
