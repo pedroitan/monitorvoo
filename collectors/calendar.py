@@ -21,7 +21,8 @@ from .sources import google_flights
 
 WINDOW_DAYS = 30
 ROUND_TRIP_DAYS = 7
-DELAY = (2, 5)
+DELAY = (3, 6)
+RETRIES = 2
 
 CALENDAR_ROUTES = [
     ("SSA", "GRU", "nacional"),
@@ -65,18 +66,37 @@ def run(window: int = WINDOW_DAYS, max_calls: int | None = None, dry: bool = Fal
                 inbound = outbound + timedelta(days=ROUND_TRIP_DAYS) if trip == "round-trip" else None
                 label = f"{spec.code} {trip} {outbound.isoformat()}"
 
-                try:
-                    payload = google_flights.fetch_calendar(
-                        spec.origin, spec.destination, outbound, trip, inbound
-                    )
+                payload = None
+                for attempt in range(RETRIES + 1):
+                    try:
+                        payload = google_flights.fetch_calendar(
+                            spec.origin, spec.destination, outbound, trip, inbound
+                        )
+                        break
+                    except RuntimeError as exc:
+                        is_rate = "no flights found" in str(exc)
+                        if attempt < RETRIES:
+                            sleep = random.uniform(20, 45) if is_rate else random.uniform(5, 10)
+                            print(f"  retry {label} ({exc}; esperando {sleep:.0f}s)", file=sys.stderr)
+                            time.sleep(sleep)
+                            continue
+                        print(f"  ERRO {label}: {exc}", file=sys.stderr)
+                    except Exception as exc:
+                        if attempt < RETRIES:
+                            sleep = random.uniform(5, 10)
+                            print(f"  retry {label} ({exc}; esperando {sleep:.0f}s)", file=sys.stderr)
+                            time.sleep(sleep)
+                            continue
+                        print(f"  ERRO {label}: {exc}", file=sys.stderr)
+
+                if payload is None:
+                    calls += 1
+                elif not payload["options"]:
+                    print(f"  sem resultados {label}")
+                    skipped_no_results += 1
+                    calls += 1
+                else:
                     payload["collected_at"] = datetime.now(timezone.utc).isoformat()
-
-                    if not payload["options"]:
-                        print(f"  sem resultados {label}")
-                        skipped_no_results += 1
-                        calls += 1
-                        continue
-
                     raw_ref = storage.save_raw(payload, client)
                     if client:
                         rows = db.normalize_observations(route_id, payload, raw_ref)
@@ -87,9 +107,6 @@ def run(window: int = WINDOW_DAYS, max_calls: int | None = None, dry: bool = Fal
                         default=None,
                     )
                     print(f"  ok {label}: {len(payload['options'])} opcoes, menor R$ {best}")
-                    calls += 1
-                except Exception as exc:
-                    print(f"  ERRO {label}: {exc}", file=sys.stderr)
                     calls += 1
 
                 if max_calls is None or calls < max_calls:

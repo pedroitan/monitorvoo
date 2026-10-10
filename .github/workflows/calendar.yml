@@ -2,7 +2,7 @@ name: Calendar — coleta contínua de datas
 
 on:
   schedule:
-    - cron: "0 8,14,20 * * *"  # 08h, 14h, 20h UTC (05h, 11h, 17h BRT)
+    - cron: "0 9,21 * * *"  # 09h, 21h UTC (06h, 18h BRT)
   workflow_dispatch:
 
 jobs:
