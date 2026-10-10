@@ -45,12 +45,15 @@ def normalize_observations(route_id: str, payload: dict, raw_ref: str) -> list[d
     """Uma linha por opcao de voo retornada.
 
     `airline` = primeira companhia da opcao (marketing carrier do 1o trecho);
-    a lista completa fica no JSON bruto.
+    `flight_number` e horarios vem do primeiro trecho. A lista completa de
+    trechos fica em `legs` e no JSON bruto.
     """
     rows = []
     for opt in payload["options"]:
         if not opt["airlines"] or opt["price"] is None:
             continue
+        legs = opt.get("legs", [])
+        first = legs[0] if legs else {}
         rows.append(
             {
                 "route_id": route_id,
@@ -63,9 +66,15 @@ def normalize_observations(route_id: str, payload: dict, raw_ref: str) -> list[d
                 "price": opt["price"],
                 "currency": payload["currency"],
                 "price_brl": opt["price"],
-                "stops": max(len(opt["legs"]) - 1, 0),
+                "stops": max(len(legs) - 1, 0),
                 "source": payload["source"],
                 "raw_ref": raw_ref,
+                "flight_number": first.get("flight_number"),
+                "departure": first.get("departure"),
+                "arrival": first.get("arrival"),
+                "duration_min": first.get("duration_min"),
+                "plane_type": first.get("plane"),
+                "legs": legs,
             }
         )
     return rows
