@@ -29,7 +29,7 @@ jobs:
           COLLECT_DELAY_MIN: 5
           COLLECT_DELAY_MAX: 15
           HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
-        run: python -m collectors.collect
+        run: python -m collectors.collect --priority 1
 
       - name: Detect promos
         if: always()

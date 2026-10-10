@@ -95,6 +95,7 @@ def main() -> int:
     parser.add_argument("--route", help="codigo da rota, ex.: GRU-SSA")
     parser.add_argument("--leads", help="antecedencias em dias, ex.: 7,30")
     parser.add_argument("--trips", help="tipos, ex.: one-way,round-trip")
+    parser.add_argument("--priority", type=int, default=10, help="coletar rotas com prioridade <= N")
     parser.add_argument("--max-calls", type=int, default=10**9)
     parser.add_argument("--no-delay", action="store_true")
     args = parser.parse_args()
@@ -103,7 +104,7 @@ def main() -> int:
     client = db.get_client()
     print("Modo:", "Supabase" if client else "local (so JSON bruto)")
 
-    routes = load_routes()
+    routes = [r for r in load_routes() if r.priority <= args.priority]
     if args.route:
         routes = [r for r in routes if r.code == args.route.upper()]
         if not routes:

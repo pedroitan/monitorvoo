@@ -28,6 +28,20 @@
   { "origin": "GRU", "destination": "SCL", "kind": "internacional", "priority": 1 },
   { "origin": "GRU", "destination": "BOG", "kind": "internacional", "priority": 1 },
   { "origin": "BOG", "destination": "GRU", "kind": "internacional", "priority": 1 },
+
+  { "origin": "GRU", "destination": "MDE", "kind": "internacional", "priority": 2 },
+  { "origin": "GRU", "destination": "CTG", "kind": "internacional", "priority": 2 },
+  { "origin": "GRU", "destination": "BAQ", "kind": "internacional", "priority": 2 },
+  { "origin": "GRU", "destination": "CLO", "kind": "internacional", "priority": 2 },
+  { "origin": "GRU", "destination": "SMR", "kind": "internacional", "priority": 2 },
+  { "origin": "GRU", "destination": "PEI", "kind": "internacional", "priority": 2 },
+
+  { "origin": "MDE", "destination": "GRU", "kind": "internacional", "priority": 2 },
+  { "origin": "CTG", "destination": "GRU", "kind": "internacional", "priority": 2 },
+  { "origin": "BAQ", "destination": "GRU", "kind": "internacional", "priority": 2 },
+  { "origin": "CLO", "destination": "GRU", "kind": "internacional", "priority": 2 },
+  { "origin": "SMR", "destination": "GRU", "kind": "internacional", "priority": 2 },
+  { "origin": "PEI", "destination": "GRU", "kind": "internacional", "priority": 2 },
   { "origin": "LIS", "destination": "GRU", "kind": "internacional", "priority": 1 },
   { "origin": "MIA", "destination": "GRU", "kind": "internacional", "priority": 1 }
 ]
