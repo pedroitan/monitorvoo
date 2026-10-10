@@ -61,10 +61,10 @@ export default async function VoosPage() {
                 <li>Data/horário de partida e chegada de cada trecho</li>
                 <li>Duração e número de escalas</li>
               </ul>
-              <p className="rounded-lg bg-[#FBE3D4] p-3 text-[#B5410F]">
-                <strong>Atenção:</strong> o número do voo e os horários só aparecem na tabela
-                depois que a migration <code>0002_flight_details.sql</code> for aplicada no
-                Supabase. Enquanto isso, os dados são coletados e guardados no JSON bruto.
+              <p className="rounded-lg bg-[#D4EDDA] p-3 text-[#155724]">
+                <strong>Migration aplicada.</strong> O número do voo e os horários aparecem
+                para as coletas feitas após a migration. Linhas antigas (coletadas antes)
+                continuam sem esses detalhes até a próxima coleta daquela data.
               </p>
             </div>
           </section>
