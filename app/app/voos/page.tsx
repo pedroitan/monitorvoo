@@ -3,6 +3,25 @@ import { getLatestFlightOptions, getRoutes, cityName, formatBRL, routeCode } fro
 
 export const dynamic = "force-dynamic";
 
+function formatDateTime(iso: string | null | undefined) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return String(iso);
+  return d.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatDuration(min: number | null | undefined) {
+  if (min === null || min === undefined) return "—";
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return h > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${m}m`;
+}
+
 export default async function VoosPage() {
   const [routes, flights] = await Promise.all([getRoutes(), getLatestFlightOptions(1)]);
   const routeById = new Map(routes.map((r) => [r.id, r]));
@@ -37,18 +56,15 @@ export default async function VoosPage() {
               </p>
               <p>Dados extraídos de cada opção:</p>
               <ul className="list-disc space-y-1 pl-5">
+                <li>Número do voo (ex.: LA3548), companhia(s) e aeronave</li>
                 <li>Preço da tarifa básica (1 adulto, economy)</li>
-                <li>Companhia(s) operadora(s)</li>
-                <li>Aeroportos de origem e destino de cada trecho</li>
-                <li>Data/horário de partida e chegada</li>
-                <li>Duração e tipo de aeronave</li>
-                <li>Número de escalas</li>
+                <li>Data/horário de partida e chegada de cada trecho</li>
+                <li>Duração e número de escalas</li>
               </ul>
               <p className="rounded-lg bg-[#FBE3D4] p-3 text-[#B5410F]">
-                <strong>Atenção:</strong> a biblioteca <code>fast-flights</code> não expõe o
-                número do voo. Por isso a tabela abaixo mostra companhia, rota, data/horário e
-                preço, mas não o código de voo (ex.: LA1234). Para ter números de voo é
-                necessário outra fonte ou parse manual da resposta do Google Flights.
+                <strong>Atenção:</strong> o número do voo e os horários só aparecem na tabela
+                depois que a migration <code>0002_flight_details.sql</code> for aplicada no
+                Supabase. Enquanto isso, os dados são coletados e guardados no JSON bruto.
               </p>
             </div>
           </section>
@@ -75,8 +91,10 @@ export default async function VoosPage() {
                 <thead>
                   <tr className="border-b border-[#0E1A2B]/10 text-[#0E1A2B]/60">
                     <th className="pb-2 font-medium">Rota</th>
-                    <th className="pb-2 font-medium">Companhia</th>
+                    <th className="pb-2 font-medium">Voo</th>
                     <th className="pb-2 font-medium">Partida</th>
+                    <th className="pb-2 font-medium">Chegada</th>
+                    <th className="pb-2 font-medium text-right">Duração</th>
                     <th className="pb-2 font-medium">Tipo</th>
                     <th className="pb-2 font-medium text-right">Antec.</th>
                     <th className="pb-2 font-medium text-right">Escalas</th>
@@ -98,10 +116,15 @@ export default async function VoosPage() {
                             </div>
                           )}
                         </td>
-                        <td className="py-2">{f.airline}</td>
-                        <td className="py-2 font-mono">
-                          {new Date(f.flight_date).toLocaleDateString("pt-BR")}
+                        <td className="py-2 font-mono text-xs">
+                          {f.flight_number ?? "—"}
+                          {f.plane_type && (
+                            <div className="text-[10px] text-[#0E1A2B]/60">{f.plane_type}</div>
+                          )}
                         </td>
+                        <td className="py-2 font-mono">{formatDateTime(f.departure)}</td>
+                        <td className="py-2 font-mono">{formatDateTime(f.arrival)}</td>
+                        <td className="py-2 text-right font-mono">{formatDuration(f.duration_min)}</td>
                         <td className="py-2 capitalize">
                           {f.trip_type === "one-way" ? "só ida" : "ida e volta"}
                         </td>

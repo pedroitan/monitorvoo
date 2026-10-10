@@ -18,6 +18,13 @@ export type Observation = {
   price_brl: number;
   stops: number | null;
   source: string;
+  // campos da migration 0002 (podem estar ausentes ate aplicada)
+  flight_number?: string | null;
+  departure?: string | null;
+  arrival?: string | null;
+  duration_min?: number | null;
+  plane_type?: string | null;
+  legs?: unknown[] | null;
 };
 
 export type PromoEvent = {
@@ -139,6 +146,9 @@ export function routeCode(r: Pick<Route, "origin" | "destination">) {
 const OBS_SELECT =
   "route_id, airline, collected_at, flight_date, return_date, lead_days, trip_type, price_brl, stops, source";
 
+const OBS_SELECT_EXTENDED =
+  `${OBS_SELECT}, flight_number, departure, arrival, duration_min, plane_type, legs`;
+
 /** Busca paginada — Supabase devolve no max 1000 linhas por chamada. */
 interface Pageable<T> {
   range(
@@ -205,13 +215,26 @@ export async function getLatestFlightOptions(days: number = 1): Promise<Observat
   const since = new Date();
   since.setDate(since.getDate() - days);
   since.setHours(0, 0, 0, 0);
-  return fetchAll(() =>
-    supabase
-      .from("fare_observations")
-      .select(OBS_SELECT)
-      .gte("collected_at", since.toISOString())
-      .order("collected_at", { ascending: false })
-  );
+
+  // Tenta selecionar os novos campos da migration 0002; se ainda nao foi
+  // aplicada, cai no OBS_SELECT legado sem quebrar a pagina.
+  try {
+    return await fetchAll(() =>
+      supabase
+        .from("fare_observations")
+        .select(OBS_SELECT_EXTENDED)
+        .gte("collected_at", since.toISOString())
+        .order("collected_at", { ascending: false })
+    );
+  } catch {
+    return fetchAll(() =>
+      supabase
+        .from("fare_observations")
+        .select(OBS_SELECT)
+        .gte("collected_at", since.toISOString())
+        .order("collected_at", { ascending: false })
+    );
+  }
 }
 
 export async function getPromoEvents(): Promise<PromoEvent[]> {
