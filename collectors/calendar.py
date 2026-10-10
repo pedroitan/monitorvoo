@@ -1,7 +1,7 @@
 """Coleta de calendario de precos para rotas prioritarias.
 
-Busca todas as datas de partida numa janela (padrao 30 dias), tanto so ida
-quanto ida e volta (volta = partida + 7 dias), para um grupo pequeno de rotas.
+Busca todas as datas de partida numa janela (padrao 30 dias) para um grupo
+pequeno de rotas. Padrao: so ida. Ida e volta pode ser ativada manualmente.
 Objetivo: construir uma grade completa de precos por data e acompanhar mudancas
 intradiarias da companhias.
 """
@@ -21,8 +21,9 @@ from .sources import google_flights
 
 WINDOW_DAYS = 30
 ROUND_TRIP_DAYS = 7
-DELAY = (3, 6)
+DELAY = (5, 10)
 RETRIES = 2
+DEFAULT_TRIPS = ("one-way",)
 
 CALENDAR_ROUTES = [
     ("SSA", "GRU", "nacional"),
@@ -40,7 +41,12 @@ def calendar_routes() -> list[RouteSpec]:
     return [RouteSpec(origin=o, destination=d, kind=k, priority=10) for o, d, k in CALENDAR_ROUTES]
 
 
-def run(window: int = WINDOW_DAYS, max_calls: int | None = None, dry: bool = False) -> int:
+def run(
+    window: int = WINDOW_DAYS,
+    trips: tuple[str, ...] = DEFAULT_TRIPS,
+    max_calls: int | None = None,
+    dry: bool = False,
+) -> int:
     load_dotenv()
     client = None
     if not dry:
@@ -58,7 +64,7 @@ def run(window: int = WINDOW_DAYS, max_calls: int | None = None, dry: bool = Fal
         route_id = db.ensure_route(client, spec) if client else None
         for days_ahead in range(1, window + 1):
             outbound = today + timedelta(days=days_ahead)
-            for trip in TRIP_TYPES:
+            for trip in trips:
                 if max_calls is not None and calls >= max_calls:
                     print(f"Limite de {max_calls} chamadas atingido.")
                     return calls
@@ -119,10 +125,12 @@ def run(window: int = WINDOW_DAYS, max_calls: int | None = None, dry: bool = Fal
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--window", type=int, default=WINDOW_DAYS, help="dias de janela de partida")
+    parser.add_argument("--trips", default=",".join(DEFAULT_TRIPS), help="tipos, ex.: one-way,round-trip")
     parser.add_argument("--max-calls", type=int, default=None, help="limite de chamadas (teste)")
     parser.add_argument("--dry", action="store_true", help="nao grava no Supabase")
     args = parser.parse_args()
-    return run(args.window, args.max_calls, args.dry)
+    trips = tuple(t.strip() for t in args.trips.split(",") if t.strip())
+    return run(args.window, trips, args.max_calls, args.dry)
 
 
 if __name__ == "__main__":

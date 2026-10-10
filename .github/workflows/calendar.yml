@@ -2,7 +2,7 @@ name: Calendar — coleta contínua de datas
 
 on:
   schedule:
-    - cron: "0 9,21 * * *"  # 09h, 21h UTC (06h, 18h BRT)
+    - cron: "0 8 * * *"  # 08h UTC (05h BRT)
   workflow_dispatch:
 
 jobs:
@@ -19,4 +19,4 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python -m collectors.calendar --window 30
+        run: python -m collectors.calendar --window 30 --trips one-way
