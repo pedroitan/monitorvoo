@@ -401,3 +401,127 @@ export function formatDay(d: string) {
   const [, m, day] = d.split("-");
   return `${day}/${m}`;
 }
+
+// ---------- qualidade / QA ----------
+
+export type QualityRouteStats = {
+  routeId: string;
+  code: string;
+  origin: string;
+  destination: string;
+  kind: "nacional" | "internacional";
+  total: number;
+  first: string | null;
+  last: string | null;
+  days: number;
+  airlines: string[];
+  trips: { type: string; count: number }[];
+  leads: number[];
+  min: number;
+  max: number;
+  median: number;
+};
+
+export type QualityStats = {
+  totalObservations: number;
+  activeRoutes: number;
+  routesWithData: number;
+  collectionDays: number;
+  airlines: number;
+  dailyVolume: { day: string; count: number }[];
+  airlineCounts: { airline: string; count: number }[];
+  leadTripCounts: { lead: number; trip: string; count: number }[];
+  routes: QualityRouteStats[];
+  routesWithoutData: Route[];
+};
+
+export async function getQualityStats(): Promise<QualityStats> {
+  const [routes, obs] = await Promise.all([getRoutes(), getAllObservations()]);
+
+  const routesWithData = new Set<string>();
+  const byRoute = new Map<string, Observation[]>();
+  const byDay = new Map<string, number>();
+  const byAirline = new Map<string, number>();
+  const byLeadTrip = new Map<string, number>();
+  const airlineSet = new Set<string>();
+
+  for (const o of obs) {
+    routesWithData.add(o.route_id);
+    const list = byRoute.get(o.route_id) ?? [];
+    list.push(o);
+    byRoute.set(o.route_id, list);
+
+    const day = o.collected_at.slice(0, 10);
+    byDay.set(day, (byDay.get(day) ?? 0) + 1);
+
+    byAirline.set(o.airline, (byAirline.get(o.airline) ?? 0) + 1);
+    airlineSet.add(o.airline);
+
+    const lt = `${o.lead_days}|${o.trip_type}`;
+    byLeadTrip.set(lt, (byLeadTrip.get(lt) ?? 0) + 1);
+  }
+
+  const routeStats: QualityRouteStats[] = routes
+    .map((r) => {
+      const list = byRoute.get(r.id) ?? [];
+      const days = new Set(list.map((o) => o.collected_at.slice(0, 10)));
+      const prices = list.map((o) => o.price_brl).sort((a, b) => a - b);
+      const tripsMap = new Map<string, number>();
+      const leadsSet = new Set<number>();
+      const airlinesSet = new Set<string>();
+      for (const o of list) {
+        tripsMap.set(o.trip_type, (tripsMap.get(o.trip_type) ?? 0) + 1);
+        leadsSet.add(o.lead_days);
+        airlinesSet.add(o.airline);
+      }
+      const sortedDates = list
+        .map((o) => o.collected_at)
+        .sort((a, b) => a.localeCompare(b));
+      return {
+        routeId: r.id,
+        code: routeCode(r),
+        origin: r.origin,
+        destination: r.destination,
+        kind: r.kind,
+        total: list.length,
+        first: sortedDates[0] ?? null,
+        last: sortedDates.at(-1) ?? null,
+        days: days.size,
+        airlines: [...airlinesSet].sort(),
+        trips: [...tripsMap.entries()].map(([type, count]) => ({ type, count })),
+        leads: [...leadsSet].sort((a, b) => a - b),
+        min: prices[0] ?? 0,
+        max: prices.at(-1) ?? 0,
+        median: percentile(prices, 0.5),
+      };
+    })
+    .sort((a, b) => b.total - a.total);
+
+  const dailyVolume = [...byDay.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([day, count]) => ({ day, count }));
+
+  const airlineCounts = [...byAirline.entries()]
+    .map(([airline, count]) => ({ airline, count }))
+    .sort((a, b) => b.count - a.count);
+
+  const leadTripCounts = [...byLeadTrip.entries()]
+    .map(([key, count]) => {
+      const [lead, trip] = key.split("|");
+      return { lead: Number(lead), trip, count };
+    })
+    .sort((a, b) => a.lead - b.lead || a.trip.localeCompare(b.trip));
+
+  return {
+    totalObservations: obs.length,
+    activeRoutes: routes.length,
+    routesWithData: routesWithData.size,
+    collectionDays: byDay.size,
+    airlines: airlineSet.size,
+    dailyVolume,
+    airlineCounts,
+    leadTripCounts,
+    routes: routeStats,
+    routesWithoutData: routes.filter((r) => !routesWithData.has(r.id)),
+  };
+}
