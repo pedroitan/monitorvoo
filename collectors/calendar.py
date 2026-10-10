@@ -28,8 +28,8 @@ CALENDAR_ROUTES = [
     ("GRU", "SSA", "nacional"),
     ("GRU", "BOG", "internacional"),
     ("BOG", "GRU", "internacional"),
-    ("SSA", "SID", "internacional"),
-    ("SID", "SSA", "internacional"),
+    ("GRU", "SID", "internacional"),
+    ("SID", "GRU", "internacional"),
     ("GRU", "MAD", "internacional"),
     ("MAD", "GRU", "internacional"),
 ]
