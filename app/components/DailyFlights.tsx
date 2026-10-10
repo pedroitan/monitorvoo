@@ -57,6 +57,7 @@ export function DailyFlights({ flights }: { flights: Observation[] }) {
             <th className="pb-2 font-medium text-right">Duração</th>
             <th className="pb-2 font-medium text-right">Escalas</th>
             <th className="pb-2 font-medium text-right">Preço</th>
+            <th className="pb-2 font-medium">Coletado</th>
           </tr>
         </thead>
         <tbody className="text-[#0E1A2B]">
@@ -70,6 +71,9 @@ export function DailyFlights({ flights }: { flights: Observation[] }) {
               <td className="py-2 text-right font-mono">{f.stops ?? 0}</td>
               <td className="py-2 text-right font-mono font-medium text-[#B5410F]">
                 {formatBRL(f.price_brl)}
+              </td>
+              <td className="py-2 font-mono text-xs text-[#0E1A2B]/70">
+                {formatDateTime(f.collected_at)}
               </td>
             </tr>
           ))}

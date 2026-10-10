@@ -99,6 +99,7 @@ export default async function VoosPage() {
                     <th className="pb-2 font-medium text-right">Antec.</th>
                     <th className="pb-2 font-medium text-right">Escalas</th>
                     <th className="pb-2 font-medium text-right">Preço</th>
+                    <th className="pb-2 font-medium">Coletado</th>
                     <th className="pb-2 font-medium">Fonte</th>
                   </tr>
                 </thead>
@@ -132,6 +133,9 @@ export default async function VoosPage() {
                         <td className="py-2 text-right font-mono">{f.stops ?? 0}</td>
                         <td className="py-2 text-right font-mono font-medium text-[#B5410F]">
                           {formatBRL(f.price_brl)}
+                        </td>
+                        <td className="py-2 font-mono text-xs text-[#0E1A2B]/70">
+                          {formatDateTime(f.collected_at)}
                         </td>
                         <td className="py-2 text-xs">{sourceLabel(f.source)}</td>
                       </tr>
