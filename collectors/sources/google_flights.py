@@ -98,11 +98,14 @@ def _parse_google_flights(html: str) -> list[dict]:
     return options
 
 
-def fetch(origin: str, destination: str, lead_days: int, trip: str) -> dict:
-    """Busca uma combinacao rota x antecedencia x tipo de viagem."""
-    outbound = date.today() + timedelta(days=lead_days)
-    inbound = outbound + timedelta(days=ROUND_TRIP_DAYS) if trip == "round-trip" else None
-
+def fetch_calendar(
+    origin: str,
+    destination: str,
+    outbound: date,
+    trip: str,
+    inbound: date | None = None,
+) -> dict:
+    """Busca uma combinacao rota x data de partida especifica x tipo de viagem."""
     legs = [FlightQuery(date=outbound, from_airport=origin, to_airport=destination)]
     if inbound:
         legs.append(FlightQuery(date=inbound, from_airport=destination, to_airport=origin))
@@ -123,10 +126,17 @@ def fetch(origin: str, destination: str, lead_days: int, trip: str) -> dict:
         "origin": origin,
         "destination": destination,
         "trip_type": trip,
-        "lead_days": lead_days,
+        "lead_days": (outbound - date.today()).days,
         "flight_date": outbound.isoformat(),
         "return_date": inbound.isoformat() if inbound else None,
         "currency": "BRL",
         "options": options,
         "metadata": {},
     }
+
+
+def fetch(origin: str, destination: str, lead_days: int, trip: str) -> dict:
+    """Busca uma combinacao rota x antecedencia x tipo de viagem."""
+    outbound = date.today() + timedelta(days=lead_days)
+    inbound = outbound + timedelta(days=ROUND_TRIP_DAYS) if trip == "round-trip" else None
+    return fetch_calendar(origin, destination, outbound, trip, inbound)

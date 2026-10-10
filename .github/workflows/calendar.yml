@@ -1,0 +1,22 @@
+name: Calendar — coleta contínua de datas
+
+on:
+  schedule:
+    - cron: "0 8,14,20 * * *"  # 08h, 14h, 20h UTC (05h, 11h, 17h BRT)
+  workflow_dispatch:
+
+jobs:
+  collect-calendar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependencias
+        run: pip install -r collectors/requirements.txt
+      - name: Coletar calendario
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python -m collectors.calendar --window 30
