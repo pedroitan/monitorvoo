@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdvanceCurve } from "@/components/AdvanceCurve";
 import { CalendarGrid } from "@/components/CalendarGrid";
+import { DailyFlights } from "@/components/DailyFlights";
 import { DecisionSeal } from "@/components/Seal";
 import { PriceChart } from "@/components/PriceChart";
 import { PriceGauge } from "@/components/PriceGauge";
@@ -43,12 +44,12 @@ const PERIODS = [
 
 type Props = {
   params: Promise<{ code: string }>;
-  searchParams: Promise<{ trip?: string; lead?: string; periodo?: string }>;
+  searchParams: Promise<{ trip?: string; lead?: string; periodo?: string; date?: string }>;
 };
 
 export default async function RoutePage({ params, searchParams }: Props) {
   const { code } = await params;
-  const { trip = "round-trip", lead = "30", periodo = "90" } = await searchParams;
+  const { trip = "round-trip", lead = "30", periodo = "90", date: selectedDate } = await searchParams;
 
   const route = await getRouteByCode(code);
   if (!route) notFound();
@@ -354,8 +355,35 @@ export default async function RoutePage({ params, searchParams }: Props) {
             Menor preço encontrado para cada data de partida ({TRIP_LABEL[trip]}).
           </p>
         </div>
-        <CalendarGrid calendar={routeCalendar(obs, trip)} />
+        <CalendarGrid
+          calendar={routeCalendar(obs, trip)}
+          code={code}
+          trip={trip}
+          selectedDate={selectedDate}
+        />
       </section>
+
+      {selectedDate && (
+        <section
+          aria-labelledby="dia-h"
+          className="flex flex-col gap-4 rounded-2xl border border-borda bg-card p-6"
+        >
+          <div>
+            <h2 id="dia-h" className="font-disp text-[22px] font-bold">
+              Voos em {selectedDate}
+            </h2>
+            <p className="mt-1 text-sm text-mut">
+              Todas as opções e horários encontrados para {cityName(route.origin)} →{" "}
+              {cityName(route.destination)} ({TRIP_LABEL[trip]}).
+            </p>
+          </div>
+          <DailyFlights
+            flights={obs.filter(
+              (o) => o.trip_type === trip && o.flight_date === selectedDate
+            )}
+          />
+        </section>
+      )}
 
       {/* antecedencia + sazonalidade */}
       <div className="grid gap-4 lg:grid-cols-2">

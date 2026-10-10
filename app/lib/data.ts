@@ -194,20 +194,36 @@ export async function getRouteByCode(code: string): Promise<Route | null> {
 
 /** Todas as observacoes de uma rota (todas as combinacoes). */
 export async function getObservations(routeId: string): Promise<Observation[]> {
-  return fetchAll(() =>
-    supabase
-      .from("fare_observations")
-      .select(OBS_SELECT)
-      .eq("route_id", routeId)
-      .order("collected_at")
-  );
+  try {
+    return await fetchAll(() =>
+      supabase
+        .from("fare_observations")
+        .select(OBS_SELECT_EXTENDED)
+        .eq("route_id", routeId)
+        .order("collected_at")
+    );
+  } catch {
+    return fetchAll(() =>
+      supabase
+        .from("fare_observations")
+        .select(OBS_SELECT)
+        .eq("route_id", routeId)
+        .order("collected_at")
+    );
+  }
 }
 
 /** Todas as observacoes (para a home: selos e sparklines por rota). */
 export async function getAllObservations(): Promise<Observation[]> {
-  return fetchAll(() =>
-    supabase.from("fare_observations").select(OBS_SELECT).order("collected_at")
-  );
+  try {
+    return await fetchAll(() =>
+      supabase.from("fare_observations").select(OBS_SELECT_EXTENDED).order("collected_at")
+    );
+  } catch {
+    return fetchAll(() =>
+      supabase.from("fare_observations").select(OBS_SELECT).order("collected_at")
+    );
+  }
 }
 
 /** Observacoes dos ultimos N dias (padrao 1 dia = ciclo de coleta mais recente). */

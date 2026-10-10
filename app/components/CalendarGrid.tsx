@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CalendarCell, formatBRL } from "@/lib/data";
 
 function pad2(n: number) {
@@ -28,7 +29,17 @@ function endOfWeek(d: Date) {
   return r;
 }
 
-export function CalendarGrid({ calendar }: { calendar: CalendarCell[] }) {
+export function CalendarGrid({
+  calendar,
+  code,
+  trip,
+  selectedDate,
+}: {
+  calendar: CalendarCell[];
+  code: string;
+  trip: string;
+  selectedDate?: string;
+}) {
   if (!calendar.length) {
     return (
       <p className="rounded-lg bg-[#FBE3D4] p-3 text-sm text-[#B5410F]">
@@ -95,26 +106,45 @@ export function CalendarGrid({ calendar }: { calendar: CalendarCell[] }) {
                         : ratio < 0.66
                           ? "bg-[#FDE68A]/80"
                           : "bg-[#FCA5A5]/80";
+                  const selected = selectedDate === iso;
+                  const content = (
+                    <div
+                      className={`flex h-full flex-col justify-between rounded-lg p-1.5 ${bg} ${cell ? "text-[#0E1A2B]" : "text-[#0E1A2B]/40"} ${selected ? "ring-2 ring-[#0E1A2B]" : ""}`}
+                    >
+                      <span className="font-mono font-medium">{day.getDate()}</span>
+                      {cell && (
+                        <>
+                          <span className="font-mono font-semibold leading-tight">
+                            {formatBRL(cell.price_brl)}
+                          </span>
+                          <span className="truncate text-[10px] opacity-80">
+                            {cell.airline}
+                          </span>
+                          <span className="text-[9px] opacity-70">
+                            {cell.lead_days}d
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  );
+
+                  if (!cell) {
+                    return (
+                      <td key={iso} className="h-20 min-w-[60px] p-1 align-top">
+                        {content}
+                      </td>
+                    );
+                  }
+
                   return (
                     <td key={iso} className="h-20 min-w-[60px] p-1 align-top">
-                      <div
-                        className={`flex h-full flex-col justify-between rounded-lg p-1.5 ${bg} ${cell ? "text-[#0E1A2B]" : "text-[#0E1A2B]/40"}`}
+                      <Link
+                        href={`/rota/${code}?trip=${trip}&date=${iso}`}
+                        className="block h-full"
+                        title={`Ver voos de ${iso}`}
                       >
-                        <span className="font-mono font-medium">{day.getDate()}</span>
-                        {cell && (
-                          <>
-                            <span className="font-mono font-semibold leading-tight">
-                              {formatBRL(cell.price_brl)}
-                            </span>
-                            <span className="truncate text-[10px] opacity-80">
-                              {cell.airline}
-                            </span>
-                            <span className="text-[9px] opacity-70">
-                              {cell.lead_days}d
-                            </span>
-                          </>
-                        )}
-                      </div>
+                        {content}
+                      </Link>
                     </td>
                   );
                 })}
@@ -125,8 +155,7 @@ export function CalendarGrid({ calendar }: { calendar: CalendarCell[] }) {
       </div>
 
       <p className="text-xs text-[#0E1A2B]/60">
-        Células vazias são datas ainda não coletadas. A grade preenche conforme o
-        cron acumula histórico para diferentes datas de partida.
+        Clique numa data com preço para ver todos os voos e horários daquele dia.
       </p>
     </div>
   );
