@@ -308,6 +308,31 @@ export function dailyRouteMin(obs: Observation[]): { day: string; price: number 
     .map(([day, price]) => ({ day, price }));
 }
 
+export type CalendarCell = {
+  flight_date: string;
+  price_brl: number;
+  airline: string;
+  lead_days: number;
+};
+
+/** Menor preco por data de voo — base para o calendario flexivel. */
+export function routeCalendar(obs: Observation[], trip: string): CalendarCell[] {
+  const byDate = new Map<string, Observation>();
+  for (const o of obs) {
+    if (o.trip_type !== trip) continue;
+    const cur = byDate.get(o.flight_date);
+    if (!cur || o.price_brl < cur.price_brl) byDate.set(o.flight_date, o);
+  }
+  return [...byDate.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([flight_date, o]) => ({
+      flight_date,
+      price_brl: o.price_brl,
+      airline: o.airline,
+      lead_days: o.lead_days,
+    }));
+}
+
 function percentile(sorted: number[], p: number) {
   if (!sorted.length) return 0;
   const i = (sorted.length - 1) * p;

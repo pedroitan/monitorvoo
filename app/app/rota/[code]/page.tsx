@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdvanceCurve } from "@/components/AdvanceCurve";
+import { CalendarGrid } from "@/components/CalendarGrid";
 import { DecisionSeal } from "@/components/Seal";
 import { PriceChart } from "@/components/PriceChart";
 import { PriceGauge } from "@/components/PriceGauge";
@@ -22,6 +23,7 @@ import {
   getSeasonality,
   LEAD_TIMES,
   MIN_POINTS,
+  routeCalendar,
   routeStats,
   TRIP_TYPES,
 } from "@/lib/data";
@@ -337,6 +339,22 @@ export default async function RoutePage({ params, searchParams }: Props) {
             Sem observações para esta combinação ainda.
           </p>
         )}
+      </section>
+
+      {/* calendario de datas */}
+      <section
+        aria-labelledby="cal-h"
+        className="flex flex-col gap-4 rounded-2xl border border-borda bg-card p-6"
+      >
+        <div>
+          <h2 id="cal-h" className="font-disp text-[22px] font-bold">
+            Calendário de datas
+          </h2>
+          <p className="mt-1 text-sm text-mut">
+            Menor preço encontrado para cada data de partida ({TRIP_LABEL[trip]}).
+          </p>
+        </div>
+        <CalendarGrid calendar={routeCalendar(obs, trip)} />
       </section>
 
       {/* antecedencia + sazonalidade */}
