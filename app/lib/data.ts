@@ -200,6 +200,20 @@ export async function getAllObservations(): Promise<Observation[]> {
   );
 }
 
+/** Observacoes dos ultimos N dias (padrao 1 dia = ciclo de coleta mais recente). */
+export async function getLatestFlightOptions(days: number = 1): Promise<Observation[]> {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+  since.setHours(0, 0, 0, 0);
+  return fetchAll(() =>
+    supabase
+      .from("fare_observations")
+      .select(OBS_SELECT)
+      .gte("collected_at", since.toISOString())
+      .order("collected_at", { ascending: false })
+  );
+}
+
 export async function getPromoEvents(): Promise<PromoEvent[]> {
   const { data, error } = await supabase
     .from("promo_events")
