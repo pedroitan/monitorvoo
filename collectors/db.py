@@ -37,8 +37,30 @@ def ensure_route(client, spec: RouteSpec) -> str:
 
 
 def insert_observations(client, rows: list[dict]) -> None:
-    if rows:
+    if not rows:
+        return
+    try:
         client.table("fare_observations").insert(rows).execute()
+    except Exception:
+        # Fallback: se a migration 0002 ainda nao foi aplicada, insere apenas
+        # as colunas legacy para nao parar o pipeline de coleta.
+        legacy_keys = {
+            "route_id",
+            "airline",
+            "collected_at",
+            "flight_date",
+            "return_date",
+            "lead_days",
+            "trip_type",
+            "price",
+            "currency",
+            "price_brl",
+            "stops",
+            "source",
+            "raw_ref",
+        }
+        legacy = [{k: r[k] for k in legacy_keys} for r in rows]
+        client.table("fare_observations").insert(legacy).execute()
 
 
 def normalize_observations(route_id: str, payload: dict, raw_ref: str) -> list[dict]:
