@@ -78,7 +78,8 @@ def normalize_observations(route_id: str, payload: dict, raw_ref: str) -> list[d
     """Uma linha por opcao de voo retornada.
 
     `airline` = primeira companhia da opcao (marketing carrier do 1o trecho);
-    `flight_number` e horarios vem do primeiro trecho. A lista completa de
+    `flight_number`, `departure` e `duration_min` vem do primeiro trecho e
+    `arrival` do ultimo (chegada no destino final). A lista completa de
     trechos fica em `legs` e no JSON bruto.
     """
     rows = []
@@ -104,7 +105,7 @@ def normalize_observations(route_id: str, payload: dict, raw_ref: str) -> list[d
                 "raw_ref": raw_ref,
                 "flight_number": first.get("flight_number"),
                 "departure": first.get("departure"),
-                "arrival": first.get("arrival"),
+                "arrival": legs[-1].get("arrival") if legs else None,
                 "duration_min": first.get("duration_min"),
                 "plane_type": first.get("plane"),
                 "legs": legs,
