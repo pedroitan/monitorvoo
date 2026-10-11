@@ -17,6 +17,10 @@ SOURCE = "google_flights"
 ROUND_TRIP_DAYS = 7
 
 
+class BlockedError(RuntimeError):
+    """Google devolveu a pagina de erro (tipicamente rate limit/bloqueio do IP)."""
+
+
 def _proxy() -> str | None:
     return os.environ.get("HTTP_PROXY") or os.environ.get("HTTPS_PROXY") or None
 
@@ -38,6 +42,13 @@ def _flight_number(flight_info: list | None) -> str | None:
     return number
 
 
+def itinerary_key(legs: list[dict]) -> str:
+    """Identidade do itinerario: voos de todos os trechos + partida, ex.:
+    'LA8070+LA3290@2026-11-09T14:00'."""
+    numbers = "+".join(leg.get("flight_number") or "?" for leg in legs)
+    return f"{numbers}@{legs[0]['departure']}" if legs else numbers
+
+
 def _parse_google_flights(html: str) -> list[dict]:
     parser = LexborHTMLParser(html)
     script = parser.css_first(r"script.ds\:1")
@@ -48,16 +59,25 @@ def _parse_google_flights(html: str) -> list[dict]:
     # O parser original faz split em "data:" e rsplit em ",", 1)[0]
     raw = script.text().split("data:", 1)[1].rsplit(",", 1)[0]
     if raw.endswith("errorHasStatus: true"):
-        raise RuntimeError("no flights found; received error")
+        raise BlockedError("no flights found; received error")
 
     payload = json.loads(raw)
-    if payload[3][0] is None:
-        return []
+
+    # payload[2] = "melhores voos" e payload[3] = "outros voos". A fast-flights
+    # le so o [3], e o mais barato muitas vezes esta apenas no [2]. Qualquer
+    # um dos dois vem None quando nao ha voos (ex.: data alem da malha).
+    entries = [
+        (block, k)
+        for idx, block in ((2, "best"), (3, "other"))
+        if payload[idx] and payload[idx][0]
+        for k in payload[idx][0]
+    ]
 
     options = []
-    for k in payload[3][0]:
+    seen = set()
+    for block, k in entries:
         flight = k[0]
-        price = k[1][0][1]
+        price = k[1][0][1] if k[1] and k[1][0] else None
         typ = flight[0]
         airlines = flight[1]
 
@@ -88,12 +108,19 @@ def _parse_google_flights(html: str) -> list[dict]:
                 }
             )
 
+        key = itinerary_key(legs)
+        if (key, price) in seen:
+            continue
+        seen.add((key, price))
+
         extras = flight[22]
         options.append(
             {
                 "price": price,
                 "airlines": airlines,
                 "type": typ,
+                "block": block,
+                "itinerary_key": key,
                 "legs": legs,
                 "carbon_emission_g": extras[7] if extras else None,
                 "typical_carbon_emission_g": extras[8] if extras else None,

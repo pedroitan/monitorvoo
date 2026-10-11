@@ -11,10 +11,11 @@ import {
 } from "recharts";
 import Link from "next/link";
 import { Header } from "./Header";
-import { cityName, formatBRL, formatDay } from "@/lib/data";
-import type { QualityStats } from "@/lib/data";
+import { cityName, formatBRL, formatCollected, formatDay } from "@/lib/data";
+import type { QualityStats, StudyHealth as StudyHealthData } from "@/lib/data";
+import { StudyHealth } from "./StudyHealth";
 
-export function QualityDashboard({ q }: { q: QualityStats }) {
+export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHealthData | null }) {
   const last14 = q.dailyVolume.slice(-14);
   const topAirlines = q.airlineCounts.slice(0, 12);
 
@@ -31,6 +32,8 @@ export function QualityDashboard({ q }: { q: QualityStats }) {
               Visão interna das coletas: volume, cobertura, gaps e distribuição.
             </p>
           </div>
+
+          <StudyHealth h={study} />
 
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <Card label="Observações" value={q.totalObservations.toLocaleString("pt-BR")} />
@@ -158,12 +161,7 @@ export function QualityDashboard({ q }: { q: QualityStats }) {
                       <td className="py-2 text-right font-mono">{formatBRL(r.median)}</td>
                       <td className="py-2 text-right font-mono">{formatBRL(r.max)}</td>
                       <td className="py-2 text-xs">
-                        {r.last ? new Date(r.last).toLocaleString("pt-BR", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }) : "—"}
+                        {formatCollected(r.last)}
                       </td>
                     </tr>
                   ))}

@@ -10,6 +10,7 @@ venv/
 
 # Coletas brutas locais
 raw/
+logs/
 
 # Node / Next.js
 node_modules/

@@ -13,6 +13,9 @@
 - Ingestao ANAC (tarifas historicas): `python -m collectors.anac --months 24`
 - Deteccao de promocoes: `python -m collectors.detect --verbose`
 - App: `cd app && npm run dev` (porta 3000)
+- Estudo Colombia (PRD V3), coleta horaria local: `python -m collectors.study` (`--plan` lista as buscas sem coletar; `--layers A --max-calls 3` para teste)
+- Agendar o estudo no Windows (toda hora, acorda o PC): `.\scripts\register_study_task.ps1`; logs em `logs/study-AAAA-MM-DD.log`
+- `STUDY_GRID_SLOWDOWN` no `.env`: 2 = grade B com metade do volume (rampa da 1a semana), 1 = volume cheio
 
 ## Supabase
 
@@ -27,3 +30,6 @@
 - ANAC usa codigos ICAO (SBGR) — mapeamento IATA<->ICAO em `collectors/anac.py`
 - fast-flights 3.x: API nova (`create_query`/`FlightQuery`), sem selo low/typical/high
 - `airline` em fare_observations = primeira cia da opcao; lista completa fica no JSON bruto
+- Google Flights devolve 2 blocos: payload[2] (melhores) e payload[3] (outros); o parser le os dois (o mais barato costuma estar so no [2])
+- `departure`/`arrival` = horario LOCAL do aeroporto (timestamp sem fuso, migration 0003); no app usar `formatLocalTime`, e `formatCollected` (America/Sao_Paulo) para `collected_at`
+- Toda chamada do estudo vira linha em `collection_runs` (ok/empty/error/blocked); o GitHub Actions sofre bloqueio do Google, a coleta do estudo roda local

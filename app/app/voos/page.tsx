@@ -1,19 +1,15 @@
 import { Header } from "@/components/Header";
-import { getLatestFlightOptions, getRoutes, cityName, formatBRL, routeCode } from "@/lib/data";
+import {
+  getLatestFlightOptions,
+  getRoutes,
+  cityName,
+  formatBRL,
+  formatCollected,
+  formatLocalTime,
+  routeCode,
+} from "@/lib/data";
 
 export const dynamic = "force-dynamic";
-
-function formatDateTime(iso: string | null | undefined) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return String(iso);
-  return d.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function formatDuration(min: number | null | undefined) {
   if (min === null || min === undefined) return "—";
@@ -75,14 +71,7 @@ export default async function VoosPage() {
                 Resultados ({flights.length})
               </h2>
               <span className="text-xs text-[#0E1A2B]/60">
-                Última coleta: {flights[0]?.collected_at
-                  ? new Date(flights[0].collected_at).toLocaleString("pt-BR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : "—"}
+                Última coleta: {formatCollected(flights[0]?.collected_at)}
               </span>
             </div>
 
@@ -123,8 +112,8 @@ export default async function VoosPage() {
                             <div className="text-[10px] text-[#0E1A2B]/60">{f.plane_type}</div>
                           )}
                         </td>
-                        <td className="py-2 font-mono">{formatDateTime(f.departure)}</td>
-                        <td className="py-2 font-mono">{formatDateTime(f.arrival)}</td>
+                        <td className="py-2 font-mono">{formatLocalTime(f.departure)}</td>
+                        <td className="py-2 font-mono">{formatLocalTime(f.arrival)}</td>
                         <td className="py-2 text-right font-mono">{formatDuration(f.duration_min)}</td>
                         <td className="py-2 capitalize">
                           {f.trip_type === "one-way" ? "só ida" : "ida e volta"}
@@ -135,7 +124,7 @@ export default async function VoosPage() {
                           {formatBRL(f.price_brl)}
                         </td>
                         <td className="py-2 font-mono text-xs text-[#0E1A2B]/70">
-                          {formatDateTime(f.collected_at)}
+                          {formatCollected(f.collected_at)}
                         </td>
                         <td className="py-2 text-xs">{sourceLabel(f.source)}</td>
                       </tr>

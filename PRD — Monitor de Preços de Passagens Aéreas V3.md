@@ -52,7 +52,7 @@ Risco aceito: com o PC desligado, não há coleta. Se a cobertura horária ficar
 
 | Camada | Objetivo | O que coleta | Frequência | Chamadas/dia |
 |---|---|---|---|---|
-| **A — Painel horário** | Q1, Q4 | 4 pares fixos (GRU-BOG, GRU-MDE, GRU-CTG, SSA-BOG) × 3 pares de datas fixos (ida D+21/volta D+28, ida D+60/volta D+67 e um par de alta temporada, 18/12 → 04/01) × 3 buscas (IV, SO↑, SO↓). Os pares relativos são renovados a cada 4 semanas | **24×/dia** (a cada hora) | ~864 |
+| **A — Painel horário** | Q1, Q4 | 4 pares fixos (GRU-BOG, GRU-MDE, GRU-CTG, SSA-BOG) × 3 pares de datas fixos (ida D+35/volta D+42 e ida D+74/volta D+81 no início de cada ciclo de 4 semanas, com a antecedência caindo ao longo do ciclo, e um par de alta temporada, 18/12 → 04/01) × 3 buscas (IV, SO↑, SO↓) | **24×/dia** (a cada hora) | ~864 |
 | **B — Grade de datas** | Q2, Q3, Q5 e o calendário | 42 rotas × datas de partida D+7..D+120, só ida. D+7..D+30 atualizado a cada 2 dias; D+31..D+120 a cada 4 dias | Distribuída ao longo do dia (~60 chamadas/h) | ~1.450 |
 | **C — Fila sob demanda** | Q4/Q5 nas datas do usuário | Ida e volta nas datas exatas buscadas no site e ainda sem dado (tabela `search_requests`) | A cada hora, até 50/dia | ≤ 50 |
 | **D — Rotas V2** | Manter o histórico existente | 30 rotas × antecedências fixas | Actions, 2×/dia | ~360 |

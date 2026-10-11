@@ -488,6 +488,113 @@ export function formatDay(d: string) {
   return `${day}/${m}`;
 }
 
+/** Horario local do aeroporto (partida/chegada): le o relogio direto da
+ * string, sem conversao de fuso. "2026-11-10T08:05:00" -> "10/11, 08:05". */
+export function formatLocalTime(value: string | null | undefined) {
+  const m = value?.match(/^\d{4}-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  return m ? `${m[2]}/${m[1]}, ${m[3]}:${m[4]}` : "—";
+}
+
+/** Momento da coleta, sempre no horario de Brasilia. */
+export function formatCollected(iso: string | null | undefined) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// ---------- saude da coleta do estudo Colombia (collection_runs) ----------
+
+export const STUDY_PANEL_PER_HOUR = 36; // 3 pares de datas x 4 rotas x 3 buscas
+const STUDY_GRID_TOTAL = 3 * 7 * 2 * 114; // origens x destinos x sentidos x datas D+7..D+120
+const BRT_OFFSET_MS = 3 * 3600 * 1000;
+
+export type StudyHealth = {
+  hours: { day: string; hour: number; ok: number; total: number; future: boolean }[];
+  days: string[];
+  status: { layer: string; status: string; count: number }[];
+  gridFreshPct: number;
+  lastRun: string | null;
+  runs7d: number;
+};
+
+type RunRow = {
+  run_at: string;
+  layer: string;
+  status: string;
+  origin: string;
+  destination: string;
+  flight_date: string;
+};
+
+/** null = migration 0003 ainda nao aplicada. */
+export async function getStudyHealth(): Promise<StudyHealth | null> {
+  const since = new Date(Date.now() - 7 * 86400 * 1000);
+  let runs: RunRow[];
+  try {
+    runs = await fetchAll<RunRow>(() =>
+      supabase
+        .from("collection_runs")
+        .select("run_at, layer, status, origin, destination, flight_date")
+        .gte("run_at", since.toISOString())
+        .order("run_at")
+    );
+  } catch {
+    return null;
+  }
+
+  const brt = (iso: string) => new Date(new Date(iso).getTime() - BRT_OFFSET_MS).toISOString();
+  const nowBrt = brt(new Date().toISOString());
+  const days = Array.from({ length: 7 }, (_, i) =>
+    new Date(Date.parse(nowBrt) - (6 - i) * 86400 * 1000).toISOString().slice(0, 10)
+  );
+
+  const panel = new Map<string, { ok: number; total: number }>();
+  const status = new Map<string, number>();
+  const fresh = new Set<string>();
+  const freshSince = Date.now() - 96 * 3600 * 1000;
+  for (const r of runs) {
+    const local = brt(r.run_at);
+    if (r.layer === "A") {
+      const key = local.slice(0, 13);
+      const cell = panel.get(key) ?? { ok: 0, total: 0 };
+      cell.total += 1;
+      if (r.status === "ok" || r.status === "empty") cell.ok += 1;
+      panel.set(key, cell);
+    }
+    status.set(`${r.layer}|${r.status}`, (status.get(`${r.layer}|${r.status}`) ?? 0) + 1);
+    if (r.layer === "B" && r.status !== "error" && r.status !== "blocked" && Date.parse(r.run_at) >= freshSince) {
+      fresh.add(`${r.origin}-${r.destination}-${r.flight_date}`);
+    }
+  }
+
+  const hours = days.flatMap((day) =>
+    Array.from({ length: 24 }, (_, hour) => {
+      const key = `${day}T${String(hour).padStart(2, "0")}`;
+      const cell = panel.get(key) ?? { ok: 0, total: 0 };
+      return { day, hour, ...cell, future: key > nowBrt.slice(0, 13) };
+    })
+  );
+
+  return {
+    hours,
+    days,
+    status: [...status.entries()]
+      .map(([k, count]) => {
+        const [layer, s] = k.split("|");
+        return { layer, status: s, count };
+      })
+      .sort((a, b) => a.layer.localeCompare(b.layer) || b.count - a.count),
+    gridFreshPct: Math.round((fresh.size / STUDY_GRID_TOTAL) * 100),
+    lastRun: runs.at(-1)?.run_at ?? null,
+    runs7d: runs.length,
+  };
+}
+
 // ---------- qualidade / QA ----------
 
 export type QualityRouteStats = {

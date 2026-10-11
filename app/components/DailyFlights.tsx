@@ -1,16 +1,4 @@
-import { Observation, formatBRL } from "@/lib/data";
-
-function formatDateTime(iso: string | null | undefined) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return String(iso);
-  return d.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import { Observation, formatBRL, formatCollected, formatLocalTime } from "@/lib/data";
 
 function formatDuration(min: number | null | undefined) {
   if (min === null || min === undefined) return "—";
@@ -65,15 +53,15 @@ export function DailyFlights({ flights }: { flights: Observation[] }) {
             <tr key={idx} className="border-b border-[#0E1A2B]/5 last:border-0">
               <td className="py-2 font-mono text-xs">{f.flight_number ?? "—"}</td>
               <td className="py-2">{f.airline}</td>
-              <td className="py-2 font-mono">{formatDateTime(f.departure)}</td>
-              <td className="py-2 font-mono">{formatDateTime(f.arrival)}</td>
+              <td className="py-2 font-mono">{formatLocalTime(f.departure)}</td>
+              <td className="py-2 font-mono">{formatLocalTime(f.arrival)}</td>
               <td className="py-2 text-right font-mono">{formatDuration(f.duration_min)}</td>
               <td className="py-2 text-right font-mono">{f.stops ?? 0}</td>
               <td className="py-2 text-right font-mono font-medium text-[#B5410F]">
                 {formatBRL(f.price_brl)}
               </td>
               <td className="py-2 font-mono text-xs text-[#0E1A2B]/70">
-                {formatDateTime(f.collected_at)}
+                {formatCollected(f.collected_at)}
               </td>
             </tr>
           ))}

@@ -36,11 +36,22 @@ def ensure_route(client, spec: RouteSpec) -> str:
     return res.data[0]["id"]
 
 
+V3_KEYS = {"run_id", "itinerary_key", "layer", "block"}
+
+
 def insert_observations(client, rows: list[dict]) -> None:
     if not rows:
         return
     try:
         client.table("fare_observations").insert(rows).execute()
+        return
+    except Exception:
+        # migration 0003 ainda nao aplicada: tenta sem as colunas novas
+        pass
+    try:
+        client.table("fare_observations").insert(
+            [{k: v for k, v in r.items() if k not in V3_KEYS} for r in rows]
+        ).execute()
     except Exception:
         # Fallback: se a migration 0002 ainda nao foi aplicada, insere apenas
         # as colunas legacy para nao parar o pipeline de coleta.
@@ -97,6 +108,8 @@ def normalize_observations(route_id: str, payload: dict, raw_ref: str) -> list[d
                 "duration_min": first.get("duration_min"),
                 "plane_type": first.get("plane"),
                 "legs": legs,
+                "itinerary_key": opt.get("itinerary_key"),
+                "block": opt.get("block"),
             }
         )
     return rows
