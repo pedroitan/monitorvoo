@@ -1,4 +1,4 @@
-import { Observation, formatBRL, formatCollected, formatLocalTime } from "@/lib/data";
+import { Observation, formatBRL, formatCollected, formatDay, formatLocalTime } from "@/lib/data";
 
 function formatDuration(min: number | null | undefined) {
   if (min === null || min === undefined) return "—";
@@ -33,40 +33,57 @@ export function DailyFlights({ flights }: { flights: Observation[] }) {
     return da - db;
   });
 
+  const roundTrip = sorted[0]?.trip_type === "round-trip";
+
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-[#111318]/10 text-[#111318]/60">
-            <th className="pb-2 font-medium">Voo</th>
-            <th className="pb-2 font-medium">Companhia</th>
-            <th className="pb-2 font-medium">Partida</th>
-            <th className="pb-2 font-medium">Chegada</th>
-            <th className="pb-2 font-medium text-right">Duração</th>
-            <th className="pb-2 font-medium text-right">Escalas</th>
-            <th className="pb-2 font-medium text-right">Preço</th>
-            <th className="pb-2 font-medium">Coletado</th>
-          </tr>
-        </thead>
-        <tbody className="text-[#111318]">
-          {sorted.map((f, idx) => (
-            <tr key={idx} className="border-b border-[#111318]/5 last:border-0">
-              <td className="py-2 font-mono text-xs">{f.flight_number ?? "—"}</td>
-              <td className="py-2">{f.airline}</td>
-              <td className="py-2 font-mono">{formatLocalTime(f.departure)}</td>
-              <td className="py-2 font-mono">{formatLocalTime(f.arrival)}</td>
-              <td className="py-2 text-right font-mono">{formatDuration(f.duration_min)}</td>
-              <td className="py-2 text-right font-mono">{f.stops ?? 0}</td>
-              <td className="py-2 text-right font-mono font-medium text-[#111318]">
-                {formatBRL(f.price_brl)}
-              </td>
-              <td className="py-2 font-mono text-xs text-[#111318]/70">
-                {formatCollected(f.collected_at)}
-              </td>
+    <div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-[#111318]/10 text-[#111318]/60">
+              <th className="pb-2 font-medium">Voo{roundTrip ? " de ida" : ""}</th>
+              <th className="pb-2 font-medium">Companhia</th>
+              <th className="pb-2 font-medium">Partida</th>
+              <th className="pb-2 font-medium">Chegada</th>
+              {roundTrip && <th className="pb-2 font-medium">Volta em</th>}
+              <th className="pb-2 font-medium text-right">Duração</th>
+              <th className="pb-2 font-medium text-right">Escalas</th>
+              <th className="pb-2 font-medium text-right">Preço{roundTrip ? " (ida+volta)" : ""}</th>
+              <th className="pb-2 font-medium">Coletado</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="text-[#111318]">
+            {sorted.map((f, idx) => (
+              <tr key={idx} className="border-b border-[#111318]/5 last:border-0">
+                <td className="py-2 font-mono text-xs">{f.flight_number ?? "—"}</td>
+                <td className="py-2">{f.airline}</td>
+                <td className="py-2 font-mono">{formatLocalTime(f.departure)}</td>
+                <td className="py-2 font-mono">{formatLocalTime(f.arrival)}</td>
+                {roundTrip && (
+                  <td className="py-2 font-mono">
+                    {f.return_date ? formatDay(f.return_date) : "—"}
+                  </td>
+                )}
+                <td className="py-2 text-right font-mono">{formatDuration(f.duration_min)}</td>
+                <td className="py-2 text-right font-mono">{f.stops ?? 0}</td>
+                <td className="py-2 text-right font-mono font-medium text-[#111318]">
+                  {formatBRL(f.price_brl)}
+                </td>
+                <td className="py-2 font-mono text-xs text-[#111318]/70">
+                  {formatCollected(f.collected_at)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {roundTrip && (
+        <p className="mt-3 text-xs text-[#111318]/60">
+          Horários, duração e escalas referem-se ao voo de ida. O preço já inclui
+          a volta — o voo de regresso é escolhido no site da companhia, por isso
+          não temos os horários dele aqui.
+        </p>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   cityName,
   formatBRL,
   formatCollected,
+  formatDay,
   formatLocalTime,
   getObservations,
   getRoutes,
@@ -304,23 +305,28 @@ export default async function PesquisaPage({ searchParams }: Props) {
               {selectedDate && (
                 <section className="rounded-2xl border border-[#111318]/10 bg-white p-4 shadow-sm md:p-6">
                   <h2 className="font-disp text-lg font-semibold text-[#111318]">
-                    Todos os voos · {code} em {selectedDate}
+                    Todos os voos · {code} em {selectedDate} · {TRIP_LABEL[trip]}
                   </h2>
                   <p className="mb-4 mt-1 text-sm text-[#111318]/70">
                     Uma linha por voo. “Preço atual” é o da coleta mais recente;
                     mín/máx é a amplitude já observada para aquele voo.
+                    {trip === "round-trip" &&
+                      " Horários e duração são do voo de ida — o preço já inclui a volta (o regresso é escolhido no site da companhia)."}
                   </p>
                   {flights.length ? (
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[760px] text-left text-sm">
                         <thead>
                           <tr className="border-b border-[#111318]/10 text-[#111318]/60">
-                            <th className="pb-2 font-medium">Voo</th>
+                            <th className="pb-2 font-medium">Voo{trip === "round-trip" ? " de ida" : ""}</th>
                             <th className="pb-2 font-medium">Companhia</th>
                             <th className="pb-2 font-medium">Partida → Chegada</th>
+                            {trip === "round-trip" && (
+                              <th className="pb-2 font-medium">Volta em</th>
+                            )}
                             <th className="pb-2 text-right font-medium">Duração</th>
                             <th className="pb-2 text-right font-medium">Escalas</th>
-                            <th className="pb-2 text-right font-medium">Preço atual</th>
+                            <th className="pb-2 text-right font-medium">Preço atual{trip === "round-trip" ? " (ida+volta)" : ""}</th>
                             <th className="pb-2 text-right font-medium">Mín–máx visto</th>
                             <th className="pb-2 text-right font-medium">Obs.</th>
                             <th className="pb-2 font-medium">Última coleta</th>
@@ -345,6 +351,13 @@ export default async function PesquisaPage({ searchParams }: Props) {
                                 {formatLocalTime(f.latest.departure)} →{" "}
                                 {formatLocalTime(f.latest.arrival)}
                               </td>
+                              {trip === "round-trip" && (
+                                <td className="py-2 font-mono">
+                                  {f.latest.return_date
+                                    ? formatDay(f.latest.return_date)
+                                    : "—"}
+                                </td>
+                              )}
                               <td className="py-2 text-right font-mono">
                                 {formatDuration(f.latest.duration_min)}
                               </td>

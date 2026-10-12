@@ -5,6 +5,7 @@ import {
   cityName,
   formatBRL,
   formatCollected,
+  formatDay,
   formatLocalTime,
   routeCode,
 } from "@/lib/data";
@@ -81,8 +82,9 @@ export default async function VoosPage() {
                   <tr className="border-b border-[#111318]/10 text-[#111318]/60">
                     <th className="pb-2 font-medium">Rota</th>
                     <th className="pb-2 font-medium">Voo</th>
-                    <th className="pb-2 font-medium">Partida</th>
-                    <th className="pb-2 font-medium">Chegada</th>
+                    <th className="pb-2 font-medium">Partida (ida)</th>
+                    <th className="pb-2 font-medium">Chegada (ida)</th>
+                    <th className="pb-2 font-medium">Volta</th>
                     <th className="pb-2 font-medium text-right">Duração</th>
                     <th className="pb-2 font-medium">Tipo</th>
                     <th className="pb-2 font-medium text-right">Antec.</th>
@@ -114,6 +116,9 @@ export default async function VoosPage() {
                         </td>
                         <td className="py-2 font-mono">{formatLocalTime(f.departure)}</td>
                         <td className="py-2 font-mono">{formatLocalTime(f.arrival)}</td>
+                        <td className="py-2 font-mono">
+                          {f.return_date ? formatDay(f.return_date) : "—"}
+                        </td>
                         <td className="py-2 text-right font-mono">{formatDuration(f.duration_min)}</td>
                         <td className="py-2 capitalize">
                           {f.trip_type === "one-way" ? "só ida" : "ida e volta"}
