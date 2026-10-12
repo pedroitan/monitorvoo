@@ -81,7 +81,8 @@ def collect_route(
                     # bruto ja esta salvo; falha de escrita nao derruba o lote
                     print(f"  ERRO DB {label}: {exc}", file=sys.stderr)
 
-            best = min((o["price"] for o in payload["options"]), default=None)
+            prices = [o["price"] for o in payload["options"] if o["price"] is not None]
+            best = min(prices, default=None)
             print(f"  ok {label}: {len(payload['options'])} opcoes, menor R$ {best} -> {raw_ref}")
             calls += 1
 
