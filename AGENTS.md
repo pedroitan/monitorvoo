@@ -33,3 +33,11 @@
 - Google Flights devolve 2 blocos: payload[2] (melhores) e payload[3] (outros); o parser le os dois (o mais barato costuma estar so no [2])
 - `departure`/`arrival` = horario LOCAL do aeroporto (timestamp sem fuso, migration 0003); no app usar `formatLocalTime`, e `formatCollected` (America/Sao_Paulo) para `collected_at`
 - Toda chamada do estudo vira linha em `collection_runs` (ok/empty/error/blocked); o GitHub Actions sofre bloqueio do Google, a coleta do estudo roda local
+- Os endpoints internos do Google Flights (`GetShoppingResults`, `GetCalendarGraph`, usados pela lib `fli`) exigem header assinado (`x-goog-batchexecute-bgr`) desde ago/2026 — nao funcionam fora da pagina. A unica fonte viavel e a pagina HTML via fast-flights (~300 KB gz por busca). Ate o proprio `fli` voltou a baixar a pagina.
+
+## App / visual
+
+- Referencia de design: `Monitor de Passagens — TelasV2.html` na raiz (telas "v3": Busca, Melhor preco da data, Comportamento das companhias, versoes mobile)
+- Tokens da paleta V3 em `app/app/globals.css` (fundo #F4F4F1, tinta #111318, link #2B4BF2, bom preco #E3F4EA/#0B7A48, acima #FBE7E5/#B3261E, borda #E4E4DF)
+- Fontes: Geist + Geist Mono via next/font (`--font-geist`, `--font-geist-mono`)
+- `/pesquisa`: pagina de exploracao do banco — variacao de preco por horario de coleta e todos os voos do trecho

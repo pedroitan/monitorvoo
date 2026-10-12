@@ -205,7 +205,7 @@ export default async function RoutePage({ params, searchParams }: Props) {
           <div className="font-mono text-[44px] font-semibold leading-none">
             {stats?.todayMin ? formatBRL(stats.todayMin) : "—"}
           </div>
-          <p className="leading-snug text-[#C3CDDB]">
+          <p className="leading-snug text-[#B9BDC6]">
             {stats?.status === "coletando" ? (
               <>
                 Menor preço na última coleta

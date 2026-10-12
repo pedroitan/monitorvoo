@@ -29,11 +29,11 @@ export function StatusSeal({ status }: { status: RouteStatus }) {
 
 const DECISION_STYLE: Record<RouteStatus, { label: string; className: string }> = {
   abaixo: { label: "Bom momento para comprar", className: "bg-destaque text-white" },
-  normal: { label: "Preço normal", className: "bg-[#22314D] text-white" },
-  acima: { label: "Vale esperar", className: "bg-[#22314D] text-[#C3CDDB]" },
+  normal: { label: "Preço normal", className: "bg-[#2A2D33] text-white" },
+  acima: { label: "Vale esperar", className: "bg-[#2A2D33] text-[#B9BDC6]" },
   coletando: {
     label: "Ainda coletando histórico",
-    className: "bg-[#22314D] text-[#C3CDDB]",
+    className: "bg-[#2A2D33] text-[#B9BDC6]",
   },
 };
 

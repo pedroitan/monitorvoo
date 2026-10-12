@@ -39,7 +39,7 @@ export function RouteSearch({ routes }: { routes: RouteOption[] }) {
 
   return (
     <form
-      className="flex max-w-4xl flex-wrap items-end gap-3 rounded-xl bg-white p-4"
+      className="flex max-w-4xl flex-wrap items-end gap-3 rounded-2xl border border-borda bg-card p-4 shadow-sm"
       onSubmit={(e) => {
         e.preventDefault();
         if (origin && dest) router.push(`/rota/${origin}-${dest}?trip=${trip}`);
@@ -98,9 +98,9 @@ export function RouteSearch({ routes }: { routes: RouteOption[] }) {
       </div>
       <button
         type="submit"
-        className="flex h-12 items-center rounded-lg bg-destaque px-6 font-semibold text-white"
+        className="flex h-12 items-center rounded-lg bg-tinta px-6 font-semibold text-white"
       >
-        Ver histórico
+        Ver melhor preço
       </button>
       <span className="sr-only">
         De {originName} para {dest}

@@ -22,6 +22,17 @@ const ITEMS = [
     active: (p: string) => p.startsWith("/promocoes"),
   },
   {
+    href: "/pesquisa",
+    label: "Pesquisa",
+    icon: (
+      <>
+        <circle cx="11" cy="11" r="7" />
+        <path d="M21 21l-4.3-4.3" />
+      </>
+    ),
+    active: (p: string) => p.startsWith("/pesquisa"),
+  },
+  {
     href: "/alertas",
     label: "Alertas",
     icon: (

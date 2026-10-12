@@ -10,7 +10,7 @@ function formatDuration(min: number | null | undefined) {
 export function DailyFlights({ flights }: { flights: Observation[] }) {
   if (!flights.length) {
     return (
-      <p className="rounded-lg bg-[#FBE3D4] p-3 text-sm text-[#B5410F]">
+      <p className="rounded-lg bg-[#FBE7E5] p-3 text-sm text-[#111318]">
         Nenhum voo encontrado para esta data. A coleta do calendário ainda não
         preencheu essa data ou ela ainda não foi coletada.
       </p>
@@ -37,7 +37,7 @@ export function DailyFlights({ flights }: { flights: Observation[] }) {
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-[#0E1A2B]/10 text-[#0E1A2B]/60">
+          <tr className="border-b border-[#111318]/10 text-[#111318]/60">
             <th className="pb-2 font-medium">Voo</th>
             <th className="pb-2 font-medium">Companhia</th>
             <th className="pb-2 font-medium">Partida</th>
@@ -48,19 +48,19 @@ export function DailyFlights({ flights }: { flights: Observation[] }) {
             <th className="pb-2 font-medium">Coletado</th>
           </tr>
         </thead>
-        <tbody className="text-[#0E1A2B]">
+        <tbody className="text-[#111318]">
           {sorted.map((f, idx) => (
-            <tr key={idx} className="border-b border-[#0E1A2B]/5 last:border-0">
+            <tr key={idx} className="border-b border-[#111318]/5 last:border-0">
               <td className="py-2 font-mono text-xs">{f.flight_number ?? "—"}</td>
               <td className="py-2">{f.airline}</td>
               <td className="py-2 font-mono">{formatLocalTime(f.departure)}</td>
               <td className="py-2 font-mono">{formatLocalTime(f.arrival)}</td>
               <td className="py-2 text-right font-mono">{formatDuration(f.duration_min)}</td>
               <td className="py-2 text-right font-mono">{f.stops ?? 0}</td>
-              <td className="py-2 text-right font-mono font-medium text-[#B5410F]">
+              <td className="py-2 text-right font-mono font-medium text-[#111318]">
                 {formatBRL(f.price_brl)}
               </td>
-              <td className="py-2 font-mono text-xs text-[#0E1A2B]/70">
+              <td className="py-2 font-mono text-xs text-[#111318]/70">
                 {formatCollected(f.collected_at)}
               </td>
             </tr>

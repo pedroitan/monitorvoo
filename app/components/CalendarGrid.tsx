@@ -42,7 +42,7 @@ export function CalendarGrid({
 }) {
   if (!calendar.length) {
     return (
-      <p className="rounded-lg bg-[#FBE3D4] p-3 text-sm text-[#B5410F]">
+      <p className="rounded-lg bg-[#FBE7E5] p-3 text-sm text-[#111318]">
         Ainda não há dados suficientes para montar o calendário de datas.
       </p>
     );
@@ -74,7 +74,7 @@ export function CalendarGrid({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-3 text-xs text-[#0E1A2B]/70">
+      <div className="flex flex-wrap items-center gap-3 text-xs text-[#111318]/70">
         <span className="inline-block h-3 w-3 rounded bg-[#4ADE80]" /> mais barato
         <span className="inline-block h-3 w-3 rounded bg-[#FDE68A]" /> médio
         <span className="inline-block h-3 w-3 rounded bg-[#FCA5A5]" /> mais caro
@@ -85,7 +85,7 @@ export function CalendarGrid({
           <thead>
             <tr>
               {weekdays.map((w) => (
-                <th key={w} className="pb-1 font-medium text-[#0E1A2B]/60">
+                <th key={w} className="pb-1 font-medium text-[#111318]/60">
                   {w}
                 </th>
               ))}
@@ -100,7 +100,7 @@ export function CalendarGrid({
                   const ratio = cell ? (cell.price_brl - min) / range : null;
                   const bg =
                     ratio === null
-                      ? "bg-[#0E1A2B]/5"
+                      ? "bg-[#111318]/5"
                       : ratio < 0.33
                         ? "bg-[#4ADE80]/80"
                         : ratio < 0.66
@@ -109,7 +109,7 @@ export function CalendarGrid({
                   const selected = selectedDate === iso;
                   const content = (
                     <div
-                      className={`flex h-full flex-col justify-between rounded-lg p-1.5 ${bg} ${cell ? "text-[#0E1A2B]" : "text-[#0E1A2B]/40"} ${selected ? "ring-2 ring-[#0E1A2B]" : ""}`}
+                      className={`flex h-full flex-col justify-between rounded-lg p-1.5 ${bg} ${cell ? "text-[#111318]" : "text-[#111318]/40"} ${selected ? "ring-2 ring-[#111318]" : ""}`}
                     >
                       <span className="font-mono font-medium">{day.getDate()}</span>
                       {cell && (
@@ -154,7 +154,7 @@ export function CalendarGrid({
         </table>
       </div>
 
-      <p className="text-xs text-[#0E1A2B]/60">
+      <p className="text-xs text-[#111318]/60">
         Clique numa data com preço para ver todos os voos e horários daquele dia.
       </p>
     </div>

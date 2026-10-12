@@ -81,19 +81,89 @@ export const CITIES: Record<string, string> = {
   MAD: "Madri",
   JFK: "Nova York",
   BOG: "Bogotá",
+  MDE: "Medellín",
+  CTG: "Cartagena",
+  CLO: "Cali",
+  BAQ: "Barranquilla",
+  SMR: "Santa Marta",
+  PEI: "Pereira",
   SID: "Sal (Cabo Verde)",
+};
+
+export const AIRPORTS: Record<
+  string,
+  { city: string; airport: string; country: string }
+> = {
+  GRU: { city: "São Paulo", airport: "Aeroporto Internacional de Guarulhos", country: "br" },
+  CGH: { city: "São Paulo", airport: "Aeroporto de Congonhas", country: "br" },
+  VCP: { city: "Campinas", airport: "Aeroporto Internacional de Viracopos", country: "br" },
+  GIG: { city: "Rio de Janeiro", airport: "Aeroporto Internacional do Galeão", country: "br" },
+  SDU: { city: "Rio de Janeiro", airport: "Aeroporto Santos Dumont", country: "br" },
+  SSA: { city: "Salvador", airport: "Aeroporto Internacional de Salvador", country: "br" },
+  REC: { city: "Recife", airport: "Aeroporto Internacional de Guararapes", country: "br" },
+  FOR: { city: "Fortaleza", airport: "Aeroporto Internacional Pinto Martins", country: "br" },
+  BSB: { city: "Brasília", airport: "Aeroporto Internacional Juscelino Kubitschek", country: "br" },
+  POA: { city: "Porto Alegre", airport: "Aeroporto Internacional Salgado Filho", country: "br" },
+  CNF: { city: "Belo Horizonte", airport: "Aeroporto Internacional de Confins", country: "br" },
+  MAO: { city: "Manaus", airport: "Aeroporto Internacional Eduardo Gomes", country: "br" },
+  BEL: { city: "Belém", airport: "Aeroporto Internacional Val-de-Cans", country: "br" },
+  FLN: { city: "Florianópolis", airport: "Aeroporto Internacional Hercílio Luz", country: "br" },
+  LIS: { city: "Lisboa", airport: "Aeroporto Humberto Delgado", country: "pt" },
+  MAD: { city: "Madri", airport: "Aeroporto Adolfo Suárez Madrid–Barajas", country: "es" },
+  CDG: { city: "Paris", airport: "Aeroporto Charles de Gaulle", country: "fr" },
+  MIA: { city: "Miami", airport: "Miami International Airport", country: "us" },
+  MCO: { city: "Orlando", airport: "Orlando International Airport", country: "us" },
+  JFK: { city: "Nova York", airport: "Aeroporto John F. Kennedy", country: "us" },
+  EZE: { city: "Buenos Aires", airport: "Aeroporto Internacional de Ezeiza", country: "ar" },
+  SCL: { city: "Santiago", airport: "Aeroporto Arturo Merino Benítez", country: "cl" },
+  SID: { city: "Sal (Cabo Verde)", airport: "Aeroporto Internacional Amílcar Cabral", country: "cv" },
+  BOG: { city: "Bogotá", airport: "Aeroporto Internacional El Dorado", country: "co" },
+  MDE: { city: "Medellín", airport: "Aeroporto Internacional José María Córdova", country: "co" },
+  CTG: { city: "Cartagena", airport: "Aeroporto Internacional Rafael Núñez", country: "co" },
+  CLO: { city: "Cali", airport: "Aeroporto Internacional Alfonso Bonilla Aragón", country: "co" },
+  BAQ: { city: "Barranquilla", airport: "Aeroporto Internacional Ernesto Cortissoz", country: "co" },
+  SMR: { city: "Santa Marta", airport: "Aeroporto Internacional Simón Bolívar", country: "co" },
+  PEI: { city: "Pereira", airport: "Aeroporto Internacional Matecaña", country: "co" },
 };
 
 export function cityName(iata: string) {
   return CITIES[iata] ?? iata;
 }
 
+/** "GRU" -> "São Paulo — Aeroporto Internacional de Guarulhos" */
+export function airportName(iata: string) {
+  const a = AIRPORTS[iata];
+  return a ? `${a.city} — ${a.airport}` : iata;
+}
+
+/** ISO-3166 minusculo do pais do aeroporto ("GRU" -> "br"), para flagcdn. */
+export function airportCountry(iata: string) {
+  return AIRPORTS[iata]?.country ?? null;
+}
+
+export const COUNTRIES: Record<string, string> = {
+  br: "Brasil",
+  co: "Colômbia",
+  pt: "Portugal",
+  es: "Espanha",
+  fr: "França",
+  us: "Estados Unidos",
+  ar: "Argentina",
+  cl: "Chile",
+  cv: "Cabo Verde",
+};
+
+/** "br" -> "Brasil" */
+export function countryName(iso: string | null | undefined) {
+  return (iso && COUNTRIES[iso]) ?? iso ?? "?";
+}
+
 /** Cores de serie no grafico — paleta dos tokens de design. */
 export const AIRLINE_COLORS: Record<string, string> = {
-  LATAM: "#2457C5",
+  LATAM: "#B0305C",
   "Tap Air Portugal": "#0B7A6C",
-  Azul: "#7B3FB0",
-  Gol: "#B3862E",
+  Azul: "#2F6FDE",
+  Gol: "#D9730D",
   American: "#8A9BB4",
   United: "#5B7AA0",
   "Air France": "#7C6BAE",

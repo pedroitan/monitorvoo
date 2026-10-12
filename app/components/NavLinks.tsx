@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 const LINKS = [
   { href: "/", label: "Rotas" },
   { href: "/promocoes", label: "Promoções" },
-  { href: "/alertas", label: "Meus alertas" },
+  { href: "/pesquisa", label: "Pesquisa" },
+  { href: "/alertas", label: "Alertas" },
 ];
 
 export function NavLinks() {
@@ -23,8 +24,8 @@ export function NavLinks() {
             aria-current={active ? "page" : undefined}
             className={`hidden px-3.5 py-3 text-sm font-medium md:inline-block ${
               active
-                ? "font-semibold text-white underline underline-offset-[6px]"
-                : "text-[#DCE3EE] hover:text-white"
+                ? "font-semibold text-tinta underline underline-offset-[6px]"
+                : "text-mut hover:text-tinta"
             }`}
           >
             {l.label}
@@ -33,7 +34,7 @@ export function NavLinks() {
       })}
       <Link
         href="/alertas"
-        className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-tinta md:px-[18px] md:py-3"
+        className="rounded-full bg-tinta px-4 py-2.5 text-sm font-semibold text-white md:px-[18px]"
       >
         Entrar
       </Link>

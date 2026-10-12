@@ -94,7 +94,7 @@ export default async function Promocoes() {
           <h2 className="font-disp text-[22px] font-bold">
             Quer saber assim que começar uma promoção?
           </h2>
-          <p className="mt-1.5 text-[#C3CDDB]">
+          <p className="mt-1.5 text-[#B9BDC6]">
             Escolha as rotas e avisamos por e-mail ou Telegram.
           </p>
         </div>

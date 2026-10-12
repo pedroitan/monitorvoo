@@ -49,13 +49,13 @@ export default async function ColombiaPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#F2F3F0] px-4 pb-24 pt-6 md:px-8">
+      <main className="min-h-screen bg-[#F4F4F1] px-4 pb-24 pt-6 md:px-8">
         <div className="mx-auto max-w-6xl space-y-6">
           <div className="space-y-1">
-            <h1 className="font-display text-2xl font-bold text-[#0E1A2B]">
+            <h1 className="font-disp text-2xl font-bold text-[#111318]">
               Voos para a Colômbia
             </h1>
-            <p className="text-sm text-[#0E1A2B]/70">
+            <p className="text-sm text-[#111318]/70">
               Comparativo de preços saindo de São Paulo (GRU) para os principais aeroportos colombianos.
             </p>
           </div>
@@ -65,28 +65,28 @@ export default async function ColombiaPage() {
               <a
                 key={route.id}
                 href={`/rota/${routeCode(route)}`}
-                className="rounded-2xl border border-[#0E1A2B]/10 bg-white p-4 shadow-sm transition hover:shadow-md"
+                className="rounded-2xl border border-[#111318]/10 bg-white p-4 shadow-sm transition hover:shadow-md"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-display text-lg font-bold text-[#0E1A2B]">
+                    <div className="font-disp text-lg font-bold text-[#111318]">
                       {cityName(route.destination)}
                     </div>
-                    <div className="text-xs font-mono text-[#0E1A2B]/60">{routeCode(route)}</div>
+                    <div className="text-xs font-mono text-[#111318]/60">{routeCode(route)}</div>
                   </div>
                   {data.overall && (
                     <div className="text-right">
-                      <div className="font-display text-xl font-bold text-[#B5410F]">
+                      <div className="font-disp text-xl font-bold text-[#111318]">
                         {formatBRL(data.overall.price_brl)}
                       </div>
-                      <div className="text-xs text-[#0E1A2B]/60">
+                      <div className="text-xs text-[#111318]/60">
                         {data.overall.flight_date}
                       </div>
                     </div>
                   )}
                 </div>
                 {data.overall && (
-                  <div className="mt-2 text-xs text-[#0E1A2B]/70">
+                  <div className="mt-2 text-xs text-[#111318]/70">
                     {data.overall.airline}
                   </div>
                 )}
@@ -94,14 +94,14 @@ export default async function ColombiaPage() {
             ))}
           </section>
 
-          <section className="rounded-2xl border border-[#0E1A2B]/10 bg-white p-4 shadow-sm">
-            <h2 className="mb-3 font-display text-lg font-semibold text-[#0E1A2B]">
+          <section className="rounded-2xl border border-[#111318]/10 bg-white p-4 shadow-sm">
+            <h2 className="mb-3 font-disp text-lg font-semibold text-[#111318]">
               Comparativo por antecedência
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[#0E1A2B]/10 text-[#0E1A2B]/60">
+                  <tr className="border-b border-[#111318]/10 text-[#111318]/60">
                     <th className="pb-2 font-medium">Destino</th>
                     {LEADS.map((l) => (
                       <th key={l} className="pb-2 font-medium text-right">{l}d</th>
@@ -109,12 +109,12 @@ export default async function ColombiaPage() {
                     <th className="pb-2 font-medium text-right">Melhor</th>
                   </tr>
                 </thead>
-                <tbody className="text-[#0E1A2B]">
+                <tbody className="text-[#111318]">
                   {[...byRoute.entries()].map(([route, data]) => (
-                    <tr key={route.id} className="border-b border-[#0E1A2B]/5 last:border-0">
+                    <tr key={route.id} className="border-b border-[#111318]/5 last:border-0">
                       <td className="py-2 font-medium">
                         {cityName(route.destination)}
-                        <div className="text-xs font-mono text-[#0E1A2B]/60">{routeCode(route)}</div>
+                        <div className="text-xs font-mono text-[#111318]/60">{routeCode(route)}</div>
                       </td>
                       {LEADS.map((l) => {
                         const item = data.byLead.get(l);
@@ -124,7 +124,7 @@ export default async function ColombiaPage() {
                           </td>
                         );
                       })}
-                      <td className="py-2 text-right font-mono font-medium text-[#B5410F]">
+                      <td className="py-2 text-right font-mono font-medium text-[#111318]">
                         {data.overall ? formatBRL(data.overall.price_brl) : "—"}
                       </td>
                     </tr>

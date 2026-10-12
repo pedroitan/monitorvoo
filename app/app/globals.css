@@ -1,31 +1,33 @@
 @import "tailwindcss";
 
 @theme {
-  --color-fundo: #f2f3f0;
-  --color-tinta: #0e1a2b;
-  --color-tinta-escuro: #0a1322;
-  --color-destaque: #d9581c;
-  --color-destaque-texto: #b5410f;
-  --color-destaque-suave: #f07b3f;
-  --color-faixa: #dce5f5;
-  --color-faixa-forte: #9db3de;
-  --color-promo: #fbe3d4;
-  --color-promo-selo: #fce8dc;
-  --color-promo-texto: #8e3510;
+  /* Paleta das telas V3 (Monitor de Passagens — TelasV2) */
+  --color-fundo: #f4f4f1;
+  --color-tinta: #111318;
+  --color-tinta-escuro: #000000;
+  --color-destaque: #0b7a48;
+  --color-destaque-texto: #0b7a48;
+  --color-destaque-suave: #2fa36b;
+  --color-faixa: #f4f4f1;
+  --color-faixa-forte: #c9ccd3;
+  --color-promo: #fbe7e5;
+  --color-promo-selo: #fbe7e5;
+  --color-promo-texto: #b3261e;
   --color-card: #ffffff;
-  --color-borda: #e1e4e8;
-  --color-borda-forte: #c7cdd6;
-  --color-texto: #3b4759;
-  --color-mut: #556274;
-  --color-link: #2457c5;
-  --color-link-hover: #163a8a;
-  --color-grade: #eef0f3;
-  --color-neutro-selo: #e8ebef;
-  --color-alto-selo: #e3eaf8;
+  --color-borda: #e4e4df;
+  --color-borda-forte: #d5d5cf;
+  --color-texto: #3a3f49;
+  --color-mut: #5b616e;
+  --color-link: #2b4bf2;
+  --color-link-hover: #1d3ad8;
+  --color-grade: #f4f4f1;
+  --color-neutro-selo: #eeeeea;
+  --color-alto-selo: #fbe7e5;
+  --color-alto-texto: #b3261e;
 
-  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
-  --font-disp: var(--font-bricolage), var(--font-plex-sans), sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-sans: var(--font-geist), system-ui, sans-serif;
+  --font-disp: var(--font-geist), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 body {

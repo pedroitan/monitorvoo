@@ -22,13 +22,13 @@ export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHe
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#F2F3F0] px-4 pb-24 pt-6 md:px-8">
+      <main className="min-h-screen bg-[#F4F4F1] px-4 pb-24 pt-6 md:px-8">
         <div className="mx-auto max-w-6xl space-y-6">
           <div className="space-y-1">
-            <h1 className="font-display text-2xl font-bold text-[#0E1A2B]">
+            <h1 className="font-disp text-2xl font-bold text-[#111318]">
               Qualidade dos dados
             </h1>
-            <p className="text-sm text-[#0E1A2B]/70">
+            <p className="text-sm text-[#111318]/70">
               Visão interna das coletas: volume, cobertura, gaps e distribuição.
             </p>
           </div>
@@ -53,8 +53,8 @@ export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHe
             <Card label="Volume médio/dia" value={Math.round(q.totalObservations / Math.max(1, q.collectionDays)).toLocaleString("pt-BR")} />
           </div>
 
-          <section className="rounded-2xl border border-[#0E1A2B]/10 bg-white p-4 shadow-sm">
-            <h2 className="mb-3 font-display text-lg font-semibold text-[#0E1A2B]">
+          <section className="rounded-2xl border border-[#111318]/10 bg-white p-4 shadow-sm">
+            <h2 className="mb-3 font-disp text-lg font-semibold text-[#111318]">
               Volume de coleta por dia
             </h2>
             <div className="h-64 w-full">
@@ -64,12 +64,12 @@ export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHe
                   <XAxis
                     dataKey="day"
                     tickFormatter={(v) => formatDay(v)}
-                    tick={{ fill: "#0E1A2B", fontSize: 12 }}
+                    tick={{ fill: "#111318", fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis
-                    tick={{ fill: "#0E1A2B", fontSize: 12 }}
+                    tick={{ fill: "#111318", fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
                     allowDecimals={false}
@@ -79,14 +79,14 @@ export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHe
                     formatter={(v) => [Number(v).toLocaleString("pt-BR"), "observações"]}
                     labelFormatter={(l) => formatDay(String(l))}
                   />
-                  <Bar dataKey="count" fill="#2457C5" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" fill="#2B4BF2" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#0E1A2B]/10 bg-white p-4 shadow-sm">
-            <h2 className="mb-3 font-display text-lg font-semibold text-[#0E1A2B]">
+          <section className="rounded-2xl border border-[#111318]/10 bg-white p-4 shadow-sm">
+            <h2 className="mb-3 font-disp text-lg font-semibold text-[#111318]">
               Observações por companhia
             </h2>
             <div className="h-64 w-full">
@@ -95,7 +95,7 @@ export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHe
                   <CartesianGrid stroke="#E5E7EB" horizontal={true} vertical={false} />
                   <XAxis
                     type="number"
-                    tick={{ fill: "#0E1A2B", fontSize: 12 }}
+                    tick={{ fill: "#111318", fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
                     allowDecimals={false}
@@ -104,7 +104,7 @@ export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHe
                     type="category"
                     dataKey="airline"
                     width={110}
-                    tick={{ fill: "#0E1A2B", fontSize: 12 }}
+                    tick={{ fill: "#111318", fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
                   />
@@ -118,14 +118,14 @@ export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHe
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#0E1A2B]/10 bg-white p-4 shadow-sm">
-            <h2 className="mb-3 font-display text-lg font-semibold text-[#0E1A2B]">
+          <section className="rounded-2xl border border-[#111318]/10 bg-white p-4 shadow-sm">
+            <h2 className="mb-3 font-disp text-lg font-semibold text-[#111318]">
               Cobertura por rota
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[#0E1A2B]/10 text-[#0E1A2B]/60">
+                  <tr className="border-b border-[#111318]/10 text-[#111318]/60">
                     <th className="pb-2 font-medium">Rota</th>
                     <th className="pb-2 font-medium">Tipo</th>
                     <th className="pb-2 font-medium text-right">Obs</th>
@@ -138,17 +138,17 @@ export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHe
                     <th className="pb-2 font-medium">Última coleta</th>
                   </tr>
                 </thead>
-                <tbody className="text-[#0E1A2B]">
+                <tbody className="text-[#111318]">
                   {q.routes.map((r) => (
-                    <tr key={r.routeId} className="border-b border-[#0E1A2B]/5 last:border-0">
+                    <tr key={r.routeId} className="border-b border-[#111318]/5 last:border-0">
                       <td className="py-2 font-medium">
                         <Link
                           href={`/rota/${r.code}`}
-                          className="text-[#2457C5] hover:underline"
+                          className="text-[#2B4BF2] hover:underline"
                         >
                           {r.code}
                         </Link>
-                        <div className="text-xs text-[#0E1A2B]/60">
+                        <div className="text-xs text-[#111318]/60">
                           {cityName(r.origin)} → {cityName(r.destination)}
                         </div>
                       </td>
@@ -171,15 +171,15 @@ export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHe
           </section>
 
           {q.routesWithoutData.length > 0 && (
-            <section className="rounded-2xl border border-[#D9581C]/30 bg-[#FBE3D4] p-4">
-              <h2 className="mb-2 font-display text-lg font-semibold text-[#B5410F]">
+            <section className="rounded-2xl border border-[#0B7A48]/30 bg-[#FBE7E5] p-4">
+              <h2 className="mb-2 font-disp text-lg font-semibold text-[#111318]">
                 Rotas sem observações ({q.routesWithoutData.length})
               </h2>
               <div className="flex flex-wrap gap-2">
                 {q.routesWithoutData.map((r) => (
                   <span
                     key={r.id}
-                    className="rounded-full bg-white px-3 py-1 text-xs font-medium text-[#0E1A2B] shadow-sm"
+                    className="rounded-full bg-white px-3 py-1 text-xs font-medium text-[#111318] shadow-sm"
                   >
                     {r.origin}-{r.destination}
                   </span>
@@ -188,22 +188,22 @@ export function QualityDashboard({ q, study }: { q: QualityStats; study: StudyHe
             </section>
           )}
 
-          <section className="rounded-2xl border border-[#0E1A2B]/10 bg-white p-4 shadow-sm">
-            <h2 className="mb-3 font-display text-lg font-semibold text-[#0E1A2B]">
+          <section className="rounded-2xl border border-[#111318]/10 bg-white p-4 shadow-sm">
+            <h2 className="mb-3 font-disp text-lg font-semibold text-[#111318]">
               Cobertura por antecedência e tipo de viagem
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[#0E1A2B]/10 text-[#0E1A2B]/60">
+                  <tr className="border-b border-[#111318]/10 text-[#111318]/60">
                     <th className="pb-2 font-medium">Antecedência</th>
                     <th className="pb-2 font-medium">Tipo</th>
                     <th className="pb-2 font-medium text-right">Observações</th>
                   </tr>
                 </thead>
-                <tbody className="text-[#0E1A2B]">
+                <tbody className="text-[#111318]">
                   {q.leadTripCounts.map((lt) => (
-                    <tr key={`${lt.lead}-${lt.trip}`} className="border-b border-[#0E1A2B]/5 last:border-0">
+                    <tr key={`${lt.lead}-${lt.trip}`} className="border-b border-[#111318]/5 last:border-0">
                       <td className="py-2 font-mono">{lt.lead} dias</td>
                       <td className="py-2 capitalize">{lt.trip === "one-way" ? "só ida" : "ida e volta"}</td>
                       <td className="py-2 text-right font-mono">{lt.count.toLocaleString("pt-BR")}</td>
@@ -230,14 +230,14 @@ function Card({
 }) {
   const tone =
     variant === "warn"
-      ? "bg-[#FBE3D4] text-[#B5410F]"
+      ? "bg-[#FBE7E5] text-[#111318]"
       : variant === "ok"
       ? "bg-[#E8F5E9] text-[#2E7D32]"
-      : "bg-white text-[#0E1A2B]";
+      : "bg-white text-[#111318]";
   return (
-    <div className={`rounded-2xl border border-[#0E1A2B]/10 p-4 shadow-sm ${tone}`}>
+    <div className={`rounded-2xl border border-[#111318]/10 p-4 shadow-sm ${tone}`}>
       <div className="text-xs font-medium opacity-80">{label}</div>
-      <div className="mt-1 font-display text-2xl font-bold">{value}</div>
+      <div className="mt-1 font-disp text-2xl font-bold">{value}</div>
     </div>
   );
 }

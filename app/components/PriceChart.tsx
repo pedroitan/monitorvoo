@@ -40,13 +40,13 @@ export function PriceChart({
   return (
     <ResponsiveContainer width="100%" height={340}>
       <LineChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
-        <CartesianGrid stroke="#EEF0F3" vertical={false} />
+        <CartesianGrid stroke="#EDECE7" vertical={false} />
         {promoRanges.map((r, i) => (
           <ReferenceArea
             key={i}
             x1={r.from}
             x2={r.to}
-            fill="#FBE3D4"
+            fill="#FBE7E5"
             fillOpacity={1}
             strokeOpacity={0}
           />
@@ -55,24 +55,24 @@ export function PriceChart({
           <ReferenceArea
             y1={band.low}
             y2={band.high}
-            fill="#DCE5F5"
+            fill="#EEEEEA"
             fillOpacity={0.8}
             strokeOpacity={0}
           />
         )}
         <XAxis
           dataKey="time"
-          stroke="#556274"
+          stroke="#5B616E"
           fontSize={12}
-          fontFamily="var(--font-plex-mono), monospace"
+          fontFamily="var(--font-geist-mono), monospace"
           tickFormatter={(v: string) => v.slice(5, 10).split("-").reverse().join("/")}
           tickLine={false}
-          axisLine={{ stroke: "#C7CDD6" }}
+          axisLine={{ stroke: "#D5D5CF" }}
         />
         <YAxis
-          stroke="#556274"
+          stroke="#5B616E"
           fontSize={12}
-          fontFamily="var(--font-plex-mono), monospace"
+          fontFamily="var(--font-geist-mono), monospace"
           tickFormatter={(v: number) =>
             v >= 1000 ? `R$${(v / 1000).toFixed(1)}k` : `R$${v}`
           }
@@ -88,7 +88,7 @@ export function PriceChart({
             borderRadius: 10,
             fontSize: 14,
           }}
-          labelStyle={{ color: "#556274" }}
+          labelStyle={{ color: "#5B616E" }}
           formatter={(value) =>
             typeof value === "number" ? formatBRL(value) : value
           }

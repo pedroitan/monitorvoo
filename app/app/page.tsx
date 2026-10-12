@@ -1,10 +1,14 @@
 import Link from "next/link";
+import { Flag } from "@/components/Flag";
 import { PromoCard } from "@/components/PromoCard";
 import { RouteSearch } from "@/components/RouteSearch";
 import { StatusSeal } from "@/components/Seal";
 import { Sparkline } from "@/components/Sparkline";
 import {
+  airportCountry,
+  airportName,
   cityName,
+  countryName,
   formatBRL,
   getAllObservations,
   getPromoEvents,
@@ -48,20 +52,76 @@ export default async function Home({
   const activePromos = promos.filter((p) => !p.ended_at);
   const recentPromos = promos.filter((p) => p.ended_at).slice(0, 3);
 
+  // agrupa rotas pelo pais nao-brasileiro do par (domesticas ficam em "br")
+  const groups = new Map<string, typeof routes>();
+  for (const r of routes) {
+    const c =
+      [airportCountry(r.origin), airportCountry(r.destination)].find(
+        (x) => x && x !== "br"
+      ) ?? "br";
+    const list = groups.get(c) ?? [];
+    list.push(r);
+    groups.set(c, list);
+  }
+  const routeGroups = [...groups.entries()].sort(([a], [b]) =>
+    a === "br" ? -1 : b === "br" ? 1 : a === "co" ? -1 : b === "co" ? 1 : a.localeCompare(b)
+  );
+
   return (
     <>
       {/* hero */}
-      <section className="bg-tinta px-4 pb-16 pt-12 text-white md:px-6 md:pb-[72px] md:pt-14">
+      <section className="px-4 pb-10 pt-12 text-tinta md:px-6 md:pt-14">
         <div className="mx-auto flex max-w-6xl flex-col gap-7">
-          <h1 className="font-disp max-w-3xl text-4xl font-bold leading-[1.05] md:text-[56px]">
-            Saiba se o preço da passagem está bom antes de comprar.
+          <h1 className="font-disp max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight md:text-[56px]">
+            Qual o melhor preço para o seu voo?
           </h1>
-          <p className="max-w-2xl text-base leading-relaxed text-[#C3CDDB] md:text-lg">
-            Acompanhamos diariamente as principais rotas saindo do Brasil e
-            mostramos o histórico, a faixa normal de preço e quando cada
-            companhia entra em promoção.
+          <p className="max-w-2xl text-base leading-relaxed text-mut md:text-lg">
+            Informe rota, dia e horário. Mostramos o menor preço de hoje e se
+            vale comprar agora ou esperar.
           </p>
           <RouteSearch routes={searchRoutes} />
+          <div className="flex flex-col gap-2.5">
+            <span className="text-[13px] font-semibold text-mut">
+              Todas as rotas:
+            </span>
+            {routeGroups.map(([iso, rs]) => (
+              <div key={iso} className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex w-28 items-center gap-1.5 text-[13px] font-semibold text-texto">
+                  <Flag iso={iso} /> {countryName(iso)}
+                </span>
+                {rs.map((r) => (
+                  <Link
+                    key={r.id}
+                    href={`/rota/${routeCode(r)}`}
+                    title={`${airportName(r.origin)}\n→\n${airportName(r.destination)}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-borda bg-card px-3 py-1.5 font-mono text-[13px] font-medium text-tinta hover:border-borda-forte"
+                  >
+                    <Flag iata={r.origin} />
+                    {r.origin} → <Flag iata={r.destination} />
+                    {r.destination}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[13px] font-semibold text-mut">Dev:</span>
+            {[
+              ["/pesquisa", "Pesquisa"],
+              ["/voos", "Voos de hoje"],
+              ["/qualidade", "Qualidade"],
+              ["/colombia", "Colômbia"],
+              ["/promocoes", "Promoções"],
+            ].map(([href, label]) => (
+              <Link
+                key={href}
+                href={href}
+                className="rounded-full bg-grade px-3 py-1.5 text-[13px] font-medium text-texto hover:bg-borda"
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -144,7 +204,7 @@ export default async function Home({
                   <Sparkline
                     values={spark}
                     color={
-                      stats?.status === "abaixo" ? "#D9581C" : "#2457C5"
+                      stats?.status === "abaixo" ? "#0B7A48" : "#2B4BF2"
                     }
                   />
                   <div className="flex items-baseline justify-between">

@@ -1,7 +1,7 @@
 /** Mini-linha de tendência: pontos diários (menor preço por dia). */
 export function Sparkline({
   values,
-  color = "#2457C5",
+  color = "#2B4BF2",
   width = 200,
   height = 48,
 }: {
