@@ -12,7 +12,7 @@ import {
   num,
 } from "@/lib/data";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 const SLOT_LABEL: Record<string, string> = {
   curto: "Novembro (~5 semanas)",
