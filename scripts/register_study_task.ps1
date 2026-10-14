@@ -13,8 +13,11 @@ $action = New-ScheduledTaskAction -Execute $python -Argument "-m collectors.stud
 $start = (Get-Date).Date.AddHours((Get-Date).Hour + 1)
 $trigger = New-ScheduledTaskTrigger -Once -At $start -RepetitionInterval (New-TimeSpan -Hours 1)
 
+# Sem WakeToRun: o PC nao acorda do sleep para coletar — a tarefa so roda
+# enquanto o computador esta em uso (a grade B re-coleta depois, sem perda).
+# Para acordar o PC 1x/hora (maquina dedicada), adicione -WakeToRun e rode
+# como admin: powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_SLEEP RTCWAKE 1
 $settings = New-ScheduledTaskSettingsSet `
-    -WakeToRun `
     -StartWhenAvailable `
     -AllowStartIfOnBatteries `
     -DontStopIfGoingOnBatteries `
@@ -23,10 +26,6 @@ $settings = New-ScheduledTaskSettingsSet `
 
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings `
     -Description "MonitorVoo: coleta horaria do estudo Colombia (collectors.study)" -Force | Out-Null
-
-# Sem isso o PC nao acorda sozinho para a coleta da madrugada.
-powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_SLEEP RTCWAKE 1 | Out-Null
-powercfg /SETACTIVE SCHEME_CURRENT | Out-Null
 
 Write-Host "Tarefa '$taskName' registrada. Primeira execucao: $start"
 Write-Host "Python: $python"
