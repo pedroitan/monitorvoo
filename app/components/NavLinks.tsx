@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "Rotas" },
   { href: "/promocoes", label: "Promoções" },
   { href: "/pesquisa", label: "Pesquisa" },
+  { href: "/achados", label: "Achados" },
   { href: "/alertas", label: "Alertas" },
 ];
 

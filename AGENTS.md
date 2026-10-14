@@ -15,7 +15,11 @@
 - App: `cd app && npm run dev` (porta 3000)
 - Estudo Colombia (PRD V3), coleta horaria local: `python -m collectors.study` (`--plan` lista as buscas sem coletar; `--layers A --max-calls 3` para teste)
 - Agendar o estudo no Windows (toda hora, acorda o PC): `.\scripts\register_study_task.ps1`; logs em `logs/study-AAAA-MM-DD.log`
-- `STUDY_GRID_SLOWDOWN` no `.env`: 2 = grade B com metade do volume (rampa da 1a semana), 1 = volume cheio
+- `STUDY_GRID_SLOWDOWN` no `.env`: 2 = grade B com metade do volume (rampa da 1a semana), 1 = volume cheio (~110 buscas/h, ~25 min por rodada)
+- Grade B: so ida em todos os pares (D+7..D+120), so ida D+121..D+270 nos pares principais (GRU/SSA <-> BOG/MDE/CTG), ida e volta de 7/10/14 dias (slot `rt7`/`rt10`/`rt14`) nos principais; pares que voltam vazios (`LOW_YIELD`) 3x mais espacados
+- A tarefa NAO acorda o PC (sem WakeToRun); horas perdidas dormindo sao recuperadas na proxima execucao (`logs/study.state`, ate 12h, teto de 180 buscas de grade)
+- Google Flights multi-city ("entra por uma cidade, sai por outra") nao devolve resultados na pagina; open-jaw e calculado somando dois so ida
+- `/achados`: conclusoes do estudo, lidas das views `insight_*` (migration 0004, agregam no banco, janela de 30 dias)
 
 ## Supabase
 

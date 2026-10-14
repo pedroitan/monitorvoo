@@ -3,7 +3,10 @@
 Feito para rodar de hora em hora (Task Scheduler). Cada execucao:
   A — painel horario: mesmas buscas toda hora (ida e volta + 2 so ida)
   C — fila sob demanda: datas buscadas no site (search_requests)
-  B — grade de datas: fatia da grade D+7..D+120 que vence nesta hora
+  B — grade de datas: fatia da grade que vence nesta hora
+      * so ida, todos os pares e sentidos, D+7..D+120
+      * so ida, pares principais, D+121..D+270 (ferias de julho)
+      * ida e volta, pares principais, D+7..D+120, estadias de 7/10/14 dias
 
 Toda chamada vira uma linha em collection_runs (ok/empty/error/blocked).
 
@@ -47,7 +50,21 @@ PANEL_CYCLE_DAYS = 28
 GRID_EPOCH = datetime(2026, 10, 11, tzinfo=BRT)
 GRID_DAYS = (7, 120)
 GRID_SHORT_UNTIL = 30          # D+7..D+30 atualizado com mais frequencia
-GRID_PERIOD_H = {"short": 48, "long": 96}
+GRID_PERIOD_H = {"short": 48, "long": 96, "far": 168, "rt": 120}
+GRID_FAR_DAYS = (121, 270)
+RT_STAYS = (7, 10, 14)
+# Pares com mais procura: recebem horizonte longo e ida e volta na grade.
+MAIN_PAIRS = tuple((o, d) for o in ("GRU", "SSA") for d in ("BOG", "MDE", "CTG"))
+# Pares em que ~20-95% das buscas voltam sem voo (analise de out/2026): 3x mais espacados.
+LOW_YIELD = {
+    frozenset(p) for p in (
+        ("SSA", "BAQ"), ("SSA", "SMR"), ("SSA", "PEI"), ("SSA", "CLO"),
+        ("CGH", "BAQ"), ("CGH", "SMR"), ("CGH", "PEI"),
+    )
+}
+LOW_YIELD_FACTOR = 3
+CATCHUP_HOURS = 12
+MAX_GRID_PER_RUN = 180         # teto da grade por execucao (cabe em ~45 min com o painel)
 MAX_REQUESTS_PER_HOUR = 2
 MAX_RUNTIME_S = 50 * 60
 MAX_CONSECUTIVE_BLOCKS = 3
@@ -106,22 +123,55 @@ def _bucket(key: str, period: int) -> int:
     return int(hashlib.md5(key.encode()).hexdigest(), 16) % period
 
 
-def layer_b(now: datetime, slowdown: int) -> list[Query]:
+def grid_hour(now: datetime) -> int:
+    return int((now - GRID_EPOCH).total_seconds() // 3600)
+
+
+def layer_b(now: datetime, slowdown: int, last_hour: int | None = None) -> list[Query]:
     """Fatia da grade que vence nesta hora: cada (rota, data) cai num balde
-    fixo dentro do periodo, entao a carga fica espalhada ao longo do dia."""
-    hour_index = int((now - GRID_EPOCH).total_seconds() // 3600)
+    fixo dentro do periodo, entao a carga fica espalhada ao longo do dia.
+    Com `last_hour`, inclui tambem os baldes das horas perdidas desde entao
+    (PC dormindo), ate CATCHUP_HOURS para tras."""
+    hour_index = grid_hour(now)
+    first = hour_index if last_hour is None else max(last_hour + 1, hour_index - CATCHUP_HOURS + 1)
+    hours = range(min(first, hour_index), hour_index + 1)
     today = now.date()
     out = []
+
+    def due(key: str, period: int) -> bool:
+        period *= slowdown
+        bucket = _bucket(key, period)
+        return any(h % period == bucket for h in hours)
+
     for origin in ORIGINS:
         for dest in DESTINATIONS:
+            factor = LOW_YIELD_FACTOR if frozenset((origin, dest)) in LOW_YIELD else 1
+            main = (origin, dest) in MAIN_PAIRS
             for o, d in ((origin, dest), (dest, origin)):
+                last = GRID_FAR_DAYS[1] if main else GRID_DAYS[1]
+                for n in range(GRID_DAYS[0], last + 1):
+                    dep = today + timedelta(days=n)
+                    kind = "short" if n <= GRID_SHORT_UNTIL else "long" if n <= GRID_DAYS[1] else "far"
+                    if due(f"{o}-{d}-{dep}", GRID_PERIOD_H[kind] * factor):
+                        out.append(Query("B", o, d, dep))
+            if main:
                 for n in range(GRID_DAYS[0], GRID_DAYS[1] + 1):
                     dep = today + timedelta(days=n)
-                    period = GRID_PERIOD_H["short" if n <= GRID_SHORT_UNTIL else "long"] * slowdown
-                    if hour_index % period == _bucket(f"{o}-{d}-{dep}", period):
-                        out.append(Query("B", o, d, dep))
+                    for stay in RT_STAYS:
+                        if due(f"{origin}-{dest}-{dep}-rt{stay}", GRID_PERIOD_H["rt"]):
+                            out.append(Query("B", origin, dest, dep, dep + timedelta(days=stay), f"rt{stay}"))
     random.shuffle(out)
-    return out
+    return out[:MAX_GRID_PER_RUN]
+
+
+STATE_FILE = ROOT / "logs" / "study.state"
+
+
+def read_last_grid_hour() -> int | None:
+    try:
+        return int(STATE_FILE.read_text().strip())
+    except (OSError, ValueError):
+        return None
 
 
 def layer_c(client) -> list[Query]:
@@ -253,7 +303,11 @@ def main() -> int:
     now = datetime.now(BRT)
     client = None if args.plan else db.get_client()
 
-    builders = {"A": lambda: layer_a(now.date()), "B": lambda: layer_b(now, slowdown), "C": lambda: layer_c(client)}
+    builders = {
+        "A": lambda: layer_a(now.date()),
+        "B": lambda: layer_b(now, slowdown, read_last_grid_hour()),
+        "C": lambda: layer_c(client),
+    }
     queries = [q for layer in args.layers.upper() for q in builders[layer]()]
     if args.max_calls is not None:
         queries = queries[: args.max_calls]
@@ -261,6 +315,10 @@ def main() -> int:
     if args.plan:
         for layer in "ABC":
             print(layer, sum(q.layer == layer for q in queries))
+        b = [q for q in queries if q.layer == "B"]
+        far = sum(1 for q in b if not q.ret and (q.out - now.date()).days > GRID_DAYS[1])
+        print(f"  B: so ida {len(b) - sum(1 for q in b if q.ret)} (D+121+: {far}),",
+              ", ".join(f"ida e volta {s} dias: {sum(q.slot == f'rt{s}' for q in b)}" for s in RT_STAYS))
         for q in queries[:20]:
             print(" ", q.label, q.slot or "")
         return 0
@@ -292,6 +350,8 @@ def main() -> int:
             if not args.no_delay and i < len(queries) - 1:
                 time.sleep(random.uniform(*DELAY))
     finally:
+        if "B" in args.layers.upper() and args.max_calls is None:
+            STATE_FILE.write_text(str(grid_hour(now)))
         lock.unlink(missing_ok=True)
 
     log.info("fim batch %s em %.0fs: %s", batch_id[:8], time.monotonic() - started, runner.stats)

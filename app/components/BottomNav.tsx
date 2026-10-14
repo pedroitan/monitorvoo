@@ -33,6 +33,18 @@ const ITEMS = [
     active: (p: string) => p.startsWith("/pesquisa"),
   },
   {
+    href: "/achados",
+    label: "Achados",
+    icon: (
+      <>
+        <path d="M9 18h6" />
+        <path d="M10 22h4" />
+        <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" />
+      </>
+    ),
+    active: (p: string) => p.startsWith("/achados"),
+  },
+  {
     href: "/alertas",
     label: "Alertas",
     icon: (
@@ -60,7 +72,7 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className={`flex w-20 flex-col items-center gap-0.5 rounded-full py-1.5 text-[11px] ${
+              className={`flex w-[68px] flex-col items-center gap-0.5 rounded-full py-1.5 text-[11px] ${
                 active ? "bg-grade font-semibold text-tinta" : "font-medium text-texto"
               }`}
             >

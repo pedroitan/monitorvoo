@@ -107,6 +107,7 @@ export default async function Home({
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[13px] font-semibold text-mut">Dev:</span>
             {[
+              ["/achados", "Achados"],
               ["/pesquisa", "Pesquisa"],
               ["/voos", "Voos de hoje"],
               ["/qualidade", "Qualidade"],

@@ -599,6 +599,7 @@ type RunRow = {
   origin: string;
   destination: string;
   flight_date: string;
+  trip_type: string;
 };
 
 /** null = migration 0003 ainda nao aplicada. */
@@ -609,7 +610,7 @@ export async function getStudyHealth(): Promise<StudyHealth | null> {
     runs = await fetchAll<RunRow>(() =>
       supabase
         .from("collection_runs")
-        .select("run_at, layer, status, origin, destination, flight_date")
+        .select("run_at, layer, status, origin, destination, flight_date, trip_type")
         .gte("run_at", since.toISOString())
         .order("run_at")
     );
@@ -627,6 +628,7 @@ export async function getStudyHealth(): Promise<StudyHealth | null> {
   const status = new Map<string, number>();
   const fresh = new Set<string>();
   const freshSince = Date.now() - 96 * 3600 * 1000;
+  const gridEnd = new Date(Date.now() + 120 * 86400 * 1000).toISOString().slice(0, 10);
   for (const r of runs) {
     const local = brt(r.run_at);
     if (r.layer === "A") {
@@ -637,7 +639,14 @@ export async function getStudyHealth(): Promise<StudyHealth | null> {
       panel.set(key, cell);
     }
     status.set(`${r.layer}|${r.status}`, (status.get(`${r.layer}|${r.status}`) ?? 0) + 1);
-    if (r.layer === "B" && r.status !== "error" && r.status !== "blocked" && Date.parse(r.run_at) >= freshSince) {
+    if (
+      r.layer === "B" &&
+      r.trip_type === "one-way" &&
+      r.flight_date <= gridEnd &&
+      r.status !== "error" &&
+      r.status !== "blocked" &&
+      Date.parse(r.run_at) >= freshSince
+    ) {
       fresh.add(`${r.origin}-${r.destination}-${r.flight_date}`);
     }
   }
@@ -786,5 +795,111 @@ export async function getQualityStats(): Promise<QualityStats> {
     leadTripCounts,
     routes: routeStats,
     routesWithoutData: routes.filter((r) => !routesWithData.has(r.id)),
+  };
+}
+
+// ---------- achados do estudo (views da migration 0004) ----------
+
+type Num = number | string | null;
+
+export type Insights = {
+  intraday: {
+    series: number;
+    since: string | null;
+    pairs: number;
+    changes: number;
+    big_changes: number;
+    reverted: number;
+    days: number;
+    day_amp_median: Num;
+    day_amp_over5_share: Num;
+    inter_day_median: Num;
+  } | null;
+  hourly: { hour: number; pairs: number; big_changes: number; small_changes: number }[];
+  sampling: { every: number; avg_loss_pct: Num; max_loss_pct: Num; series: number }[];
+  rtVsOw: {
+    slot: string;
+    origin: string;
+    destination: string;
+    dep: string;
+    ret: string;
+    n: number;
+    rt_median: Num;
+    two_ow_median: Num;
+    ow_out_median: Num;
+    ow_back_median: Num;
+    rt_cheaper: number;
+  }[];
+  openJaw: {
+    slot: string;
+    origin: string;
+    entry: string;
+    exit: string;
+    dep: string;
+    ret: string;
+    n: number;
+    total_median: Num;
+  }[];
+  destinations: { origin: string; destination: string; dates: number; median_price: Num; min_price: Num }[];
+  weekday: { dow: number; rel: Num; n: number }[];
+  month: { month: string; rel: Num; n: number }[];
+  lead: { bucket: number; rel: Num; n: number; dates: number }[];
+  gridRt: {
+    origin: string;
+    destination: string;
+    stay: number;
+    n: number;
+    rt_median: Num;
+    two_ow_median: Num;
+    rt_cheaper: number;
+  }[];
+  emptyPairs: { origin: string; destination: string; calls: number; empty: number }[];
+  airlines: { airline: string; cheapest: number; present: number; searches: number }[];
+  direct: { searches: number; with_direct: number; direct_ratio: Num } | null;
+  departure: { period: string; rel: Num; cheapest: number; n: number }[];
+};
+
+/** Numeric do Postgres chega como string pelo PostgREST. */
+export const num = (v: Num | undefined) => (v === null || v === undefined ? null : Number(v));
+
+/** null = migration 0004 ainda nao aplicada. */
+export async function getInsights(): Promise<Insights | null> {
+  const views = [
+    "insight_intraday",
+    "insight_hourly",
+    "insight_sampling",
+    "insight_rt_vs_ow",
+    "insight_open_jaw",
+    "insight_destinations",
+    "insight_weekday",
+    "insight_month",
+    "insight_lead",
+    "insight_grid_rt",
+    "insight_empty_pairs",
+    "insight_airlines",
+    "insight_direct",
+    "insight_departure",
+  ] as const;
+  const res = await Promise.all(views.map((v) => supabase.from(v).select("*")));
+  if (res.some((r) => r.error)) return null;
+  const [
+    intraday, hourly, sampling, rtVsOw, openJaw, destinations, weekday,
+    month, lead, gridRt, emptyPairs, airlines, direct, departure,
+  ] = res.map((r) => r.data ?? []);
+  return {
+    intraday: (intraday[0] as Insights["intraday"]) ?? null,
+    hourly: hourly as Insights["hourly"],
+    sampling: sampling as Insights["sampling"],
+    rtVsOw: rtVsOw as Insights["rtVsOw"],
+    openJaw: openJaw as Insights["openJaw"],
+    destinations: destinations as Insights["destinations"],
+    weekday: weekday as Insights["weekday"],
+    month: month as Insights["month"],
+    lead: lead as Insights["lead"],
+    gridRt: gridRt as Insights["gridRt"],
+    emptyPairs: emptyPairs as Insights["emptyPairs"],
+    airlines: airlines as Insights["airlines"],
+    direct: (direct[0] as Insights["direct"]) ?? null,
+    departure: departure as Insights["departure"],
   };
 }
