@@ -1,0 +1,10 @@
+[Unit]
+Description=MonitorVoo: ingestao ANAC semanal (pega o mes novo assim que publicado)
+
+[Timer]
+OnCalendar=Sun *-*-* 05:30:00
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

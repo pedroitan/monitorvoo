@@ -7,6 +7,7 @@ import { Sparkline } from "@/components/Sparkline";
 import {
   airportCountry,
   airportName,
+  BRAZIL_MESH_PRIORITY,
   cityName,
   countryName,
   formatBRL,
@@ -31,11 +32,13 @@ export default async function Home({
   searchParams: Promise<{ filtro?: string }>;
 }) {
   const { filtro = "todas" } = await searchParams;
-  const [routes, obs, promos] = await Promise.all([
+  const [allRoutes, obs, promos] = await Promise.all([
     getRoutes(),
     getAllObservations(),
     getPromoEvents(),
   ]);
+  const routes = allRoutes.filter((r) => (r.priority ?? 1) < BRAZIL_MESH_PRIORITY);
+  const meshCount = allRoutes.length - routes.length;
   const summaries = summarizeRoutes(routes, obs);
   const filtered =
     filtro === "todas"
@@ -103,6 +106,11 @@ export default async function Home({
                 ))}
               </div>
             ))}
+            {meshCount > 0 && (
+              <Link href="/pesquisa" className="text-[13px] text-link hover:text-link-hover">
+                + {meshCount} trechos da malha Brasil (ver em Pesquisa)
+              </Link>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[13px] font-semibold text-mut">Dev:</span>

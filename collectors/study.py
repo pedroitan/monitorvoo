@@ -3,6 +3,8 @@
 Feito para rodar de hora em hora (Task Scheduler). Cada execucao:
   A — painel horario: mesmas buscas toda hora (ida e volta + 2 so ida)
   C — fila sob demanda: datas buscadas no site (search_requests)
+  D — malha Brasil: trechos com voo ~diario na ANAC VRA, algumas antecedencias;
+      o volume por hora sobe devagar e cai pela metade a cada bloqueio
   B — grade de datas: fatia da grade que vence nesta hora
       * so ida, todos os pares e sentidos, D+7..D+120
       * so ida, pares principais, D+121..D+270 (ferias de julho)
@@ -19,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import logging
 import os
 import random
@@ -63,6 +66,10 @@ LOW_YIELD = {
     )
 }
 LOW_YIELD_FACTOR = 3
+BRAZIL_LEADS = (7, 21, 45, 90)
+BRAZIL_MIN_FLIGHTS = 30        # voos realizados no mes (VRA) para entrar na malha (~1/dia)
+BRAZIL_BUDGET = {"start": 10, "min": 4, "step": 2}
+BRAZIL_PRIORITY = 3            # rotas da malha nao aparecem na home do site
 CATCHUP_HOURS = 12
 MAX_GRID_PER_RUN = 180         # teto da grade por execucao (cabe em ~45 min com o painel)
 MAX_REQUESTS_PER_HOUR = 2
@@ -82,6 +89,7 @@ class Query:
     ret: date | None = None
     slot: str | None = None
     request_id: int | None = None
+    kind: str | None = None        # "nacional"/"internacional" (camada D, vindo da VRA)
 
     @property
     def trip(self) -> str:
@@ -167,11 +175,76 @@ def layer_b(now: datetime, slowdown: int, last_hour: int | None = None) -> list[
 STATE_FILE = ROOT / "logs" / "study.state"
 
 
-def read_last_grid_hour() -> int | None:
+def read_state() -> dict:
+    """{"grid_hour": int, "brazil_budget": int}. Aceita o formato antigo (so o inteiro)."""
     try:
-        return int(STATE_FILE.read_text().strip())
-    except (OSError, ValueError):
-        return None
+        raw = STATE_FILE.read_text().strip()
+    except OSError:
+        return {}
+    try:
+        data = json.loads(raw)
+    except ValueError:
+        return {}
+    return data if isinstance(data, dict) else {"grid_hour": int(data)}
+
+
+def write_state(state: dict) -> None:
+    STATE_FILE.parent.mkdir(exist_ok=True)
+    STATE_FILE.write_text(json.dumps(state))
+
+
+def brazil_max() -> int:
+    return int(os.environ.get("STUDY_BRAZIL_MAX", "120"))
+
+
+def next_brazil_budget(budget: int, stats: dict[str, int], timed_out: bool) -> int:
+    """Sobe devagar enquanto o Google aceita; corta pela metade no primeiro bloqueio."""
+    calls = sum(stats.values())
+    blocked = sum(v for k, v in stats.items() if k.endswith(":blocked"))
+    errors = sum(v for k, v in stats.items() if k.endswith(":error"))
+    if blocked:
+        return max(BRAZIL_BUDGET["min"], budget // 2)
+    if calls and errors / calls > 0.2:
+        return max(BRAZIL_BUDGET["min"], int(budget * 0.8))
+    if timed_out:
+        return budget
+    return min(brazil_max(), budget + BRAZIL_BUDGET["step"])
+
+
+def layer_d(client, now: datetime, budget: int) -> list[Query]:
+    """Malha Brasil: trechos com voo ~diario na VRA x BRAZIL_LEADS, so ida.
+    Cada (trecho, antecedencia) cai num balde; o numero de baldes e ajustado
+    para que ~`budget` buscas vencam por hora."""
+    if client is None or budget <= 0:
+        return []
+    try:
+        rows = (
+            client.table("anac_routes_latest").select("origin, destination, line_type, flights")
+            .gte("flights", BRAZIL_MIN_FLIGHTS).execute().data
+        )
+    except Exception as exc:
+        log.warning("malha Brasil indisponivel (migration 0005 / ingestao VRA?): %s", exc)
+        return []
+    study = {frozenset((o, d)) for o in ORIGINS for d in DESTINATIONS}
+    routes = sorted(
+        (r["origin"], r["destination"], "nacional" if r["line_type"] == "N" else "internacional")
+        for r in rows
+        if len(r["origin"]) == 3 and len(r["destination"]) == 3
+        and frozenset((r["origin"], r["destination"])) not in study
+    )
+    items = [(o, d, k, lead) for o, d, k in routes for lead in BRAZIL_LEADS]
+    if not items:
+        return []
+    period = max(1, -(-len(items) // budget))
+    hour = grid_hour(now)
+    today = now.date()
+    out = [
+        Query("D", o, d, today + timedelta(days=lead), slot=f"d{lead}", kind=kind)
+        for o, d, kind, lead in items
+        if hour % period == _bucket(f"D-{o}-{d}-{lead}", period)
+    ]
+    random.shuffle(out)
+    return out
 
 
 def layer_c(client) -> list[Query]:
@@ -200,13 +273,24 @@ class Runner:
         self.blocks_in_row = 0
         self.stats: dict[str, int] = {}
 
-    def route_id(self, origin: str, dest: str) -> str | None:
+    def route_id(self, q: "Query") -> str | None:
         if self.client is None:
             return None
-        code = f"{origin}-{dest}"
+        code = f"{q.origin}-{q.destination}"
         if code not in self.route_ids:
-            kind = "nacional" if {origin, dest} <= {"SSA", "GRU", "CGH"} else "internacional"
-            self.route_ids[code] = db.ensure_route(self.client, RouteSpec(origin, dest, kind, priority=2))
+            # rota existente mantem prioridade/tipo (nao rebaixa as do coletor classico)
+            found = (
+                self.client.table("routes").select("id").eq("origin", q.origin)
+                .eq("destination", q.destination).limit(1).execute().data
+            )
+            if found:
+                self.route_ids[code] = found[0]["id"]
+            else:
+                kind = q.kind or ("nacional" if {q.origin, q.destination} <= {"SSA", "GRU", "CGH"} else "internacional")
+                priority = BRAZIL_PRIORITY if q.layer == "D" else 2
+                self.route_ids[code] = db.ensure_route(
+                    self.client, RouteSpec(q.origin, q.destination, kind, priority=priority)
+                )
         return self.route_ids[code]
 
     def fetch(self, q: Query) -> tuple[str, dict | None, str | None]:
@@ -227,7 +311,7 @@ class Runner:
         started = time.monotonic()
         status, payload, error = self.fetch(q)
         duration_ms = int((time.monotonic() - started) * 1000)
-        route_id = self.route_id(q.origin, q.destination)
+        route_id = self.route_id(q)
 
         raw_ref = None
         prices = [o["price"] for o in (payload or {}).get("options", []) if o["price"] is not None]
@@ -291,7 +375,7 @@ def setup_logging() -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--layers", default="ACB", help="camadas e ordem, ex.: A, AB, ACB")
+    parser.add_argument("--layers", default="ACBD", help="camadas e ordem, ex.: A, AB, ACBD")
     parser.add_argument("--max-calls", type=int, default=None)
     parser.add_argument("--plan", action="store_true", help="so lista as buscas, sem coletar")
     parser.add_argument("--no-delay", action="store_true")
@@ -301,20 +385,24 @@ def main() -> int:
     setup_logging()
     slowdown = int(os.environ.get("STUDY_GRID_SLOWDOWN", "1"))
     now = datetime.now(BRT)
-    client = None if args.plan else db.get_client()
+    client = db.get_client()  # no --plan so le (malha Brasil); nada e gravado
+    state = read_state()
+    budget = int(state.get("brazil_budget", BRAZIL_BUDGET["start"]))
 
     builders = {
         "A": lambda: layer_a(now.date()),
-        "B": lambda: layer_b(now, slowdown, read_last_grid_hour()),
-        "C": lambda: layer_c(client),
+        "B": lambda: layer_b(now, slowdown, state.get("grid_hour")),
+        "C": lambda: [] if args.plan else layer_c(client),
+        "D": lambda: layer_d(client, now, budget),
     }
     queries = [q for layer in args.layers.upper() for q in builders[layer]()]
     if args.max_calls is not None:
         queries = queries[: args.max_calls]
 
     if args.plan:
-        for layer in "ABC":
+        for layer in "ABCD":
             print(layer, sum(q.layer == layer for q in queries))
+        print(f"  D: orcamento atual {budget}/h (max {brazil_max()})")
         b = [q for q in queries if q.layer == "B"]
         far = sum(1 for q in b if not q.ret and (q.out - now.date()).days > GRID_DAYS[1])
         print(f"  B: so ida {len(b) - sum(1 for q in b if q.ret)} (D+121+: {far}),",
@@ -331,11 +419,14 @@ def main() -> int:
     batch_id = str(uuid4())
     runner = Runner(client, batch_id)
     started = time.monotonic()
-    log.info("batch %s: %d buscas (%s), grade x%d", batch_id[:8], len(queries), args.layers, slowdown)
+    log.info("batch %s: %d buscas (%s), grade x%d, malha %d/h", batch_id[:8], len(queries),
+             args.layers, slowdown, budget)
     done_requests: set[int] = set()
+    timed_out = False
     try:
         for i, q in enumerate(queries):
             if time.monotonic() - started > MAX_RUNTIME_S:
+                timed_out = True
                 log.warning("limite de tempo atingido; %d buscas ficaram para a proxima hora", len(queries) - i)
                 break
             status = runner.run(q)
@@ -350,11 +441,16 @@ def main() -> int:
             if not args.no_delay and i < len(queries) - 1:
                 time.sleep(random.uniform(*DELAY))
     finally:
-        if "B" in args.layers.upper() and args.max_calls is None:
-            STATE_FILE.write_text(str(grid_hour(now)))
+        if args.max_calls is None:
+            if "B" in args.layers.upper():
+                state["grid_hour"] = grid_hour(now)
+            if "D" in args.layers.upper():
+                state["brazil_budget"] = next_brazil_budget(budget, runner.stats, timed_out)
+            write_state(state)
         lock.unlink(missing_ok=True)
 
-    log.info("fim batch %s em %.0fs: %s", batch_id[:8], time.monotonic() - started, runner.stats)
+    log.info("fim batch %s em %.0fs: %s; malha %d -> %d/h", batch_id[:8], time.monotonic() - started,
+             runner.stats, budget, state.get("brazil_budget", budget))
     return 0
 
 

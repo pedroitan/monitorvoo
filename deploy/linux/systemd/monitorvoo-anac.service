@@ -1,0 +1,33 @@
+[Unit]
+Description=MonitorVoo: ingestao ANAC (voos realizados VRA + tarifas)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=monitorvoo
+Group=monitorvoo
+WorkingDirectory=/opt/monitorvoo
+ExecStart=/opt/monitorvoo/.venv/bin/python -m collectors.anac_vra --months 3
+ExecStart=/opt/monitorvoo/.venv/bin/python -m collectors.anac --months 6
+TimeoutStartSec=2h
+Nice=10
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/opt/monitorvoo/logs /opt/monitorvoo/raw
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+SystemCallArchitectures=native
+UMask=0077

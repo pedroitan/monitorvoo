@@ -11,6 +11,8 @@
 - Coleta completa: `python -m collectors.collect` (sem credenciais Supabase, grava so JSON em `raw/`)
 - Backfill de brutos locais -> Supabase: `python -m collectors.backfill`
 - Ingestao ANAC (tarifas historicas): `python -m collectors.anac --months 24`
+- Ingestao ANAC VRA (todos os voos regulares realizados no Brasil, por mes x cia x trecho -> `anac_flights`): `python -m collectors.anac_vra --months 12` (migration 0005; mes publicado com ~6 semanas de atraso; horarios em Brasilia; ICAO->IATA via OurAirports em cache)
+- Maquina dedicada (notebook Ubuntu Server 24.04): `sudo bash deploy/linux/setup.sh` (firewall, SSH so chave, DNS-over-TLS, tampa fechada, systemd isolado); atualizar com `sudo bash /opt/monitorvoo/deploy/linux/update.sh`; logs `journalctl -u monitorvoo-study -f`. Ao migrar, desligar a tarefa do Windows (`Unregister-ScheduledTask MonitorVoo-Study`) para nao coletar em dobro
 - Deteccao de promocoes: `python -m collectors.detect --verbose`
 - App: `cd app && npm run dev` (porta 3000)
 - Estudo Colombia (PRD V3), coleta horaria local: `python -m collectors.study` (`--plan` lista as buscas sem coletar; `--layers A --max-calls 3` para teste)
@@ -19,6 +21,8 @@
 - Grade B: so ida em todos os pares (D+7..D+120), so ida D+121..D+270 nos pares principais (GRU/SSA <-> BOG/MDE/CTG), ida e volta de 7/10/14 dias (slot `rt7`/`rt10`/`rt14`) nos principais; pares que voltam vazios (`LOW_YIELD`) 3x mais espacados
 - A tarefa NAO acorda o PC (sem WakeToRun); horas perdidas dormindo sao recuperadas na proxima execucao (`logs/study.state`, ate 12h, teto de 180 buscas de grade)
 - Google Flights multi-city ("entra por uma cidade, sai por outra") nao devolve resultados na pagina; open-jaw e calculado somando dois so ida
+- Camada D (malha Brasil): trechos com >= 30 voos/mes na view `anac_routes_latest` x antecedencias 7/21/45/90, so ida; orcamento por hora em `logs/study.state` (`brazil_budget`): comeca em 10, +2 por hora limpa, metade a cada bloqueio, teto `STUDY_BRAZIL_MAX`. Rotas novas entram com priority 3 (fora da home). Capacidade x bloqueios em `/qualidade`
+- `.env` local: `TRAVELPAYOUTS_TOKEN` e `SERPAPI_KEY` estao VAZIOS (contas nunca criadas)
 - `/achados`: conclusoes do estudo, lidas das views `insight_*` (migration 0004, agregam no banco, janela de 30 dias)
 
 ## Supabase

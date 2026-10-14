@@ -5,6 +5,7 @@ export type Route = {
   origin: string;
   destination: string;
   kind: "nacional" | "internacional";
+  priority?: number;
 };
 
 export type Observation = {
@@ -242,12 +243,15 @@ async function fetchAll<T>(makeQuery: () => Pageable<T>): Promise<T[]> {
 export async function getRoutes(): Promise<Route[]> {
   const { data, error } = await supabase
     .from("routes")
-    .select("id, origin, destination, kind")
+    .select("id, origin, destination, kind, priority")
     .eq("active", true)
     .order("origin");
   if (error) throw error;
   return data ?? [];
 }
+
+/** priority 3 = trecho da malha Brasil (camada D do estudo), fora da home. */
+export const BRAZIL_MESH_PRIORITY = 3;
 
 export async function getRouteByCode(code: string): Promise<Route | null> {
   const [origin, destination] = code.toUpperCase().split("-");
@@ -584,7 +588,17 @@ const STUDY_GRID_TOTAL = 3 * 7 * 2 * 114; // origens x destinos x sentidos x dat
 const BRT_OFFSET_MS = 3 * 3600 * 1000;
 
 export type StudyHealth = {
-  hours: { day: string; hour: number; ok: number; total: number; future: boolean }[];
+  /** ok/total = painel A; calls/failed/mesh = todas as camadas (capacidade x bloqueios). */
+  hours: {
+    day: string;
+    hour: number;
+    ok: number;
+    total: number;
+    calls: number;
+    failed: number;
+    mesh: number;
+    future: boolean;
+  }[];
   days: string[];
   status: { layer: string; status: string; count: number }[];
   gridFreshPct: number;
@@ -629,8 +643,14 @@ export async function getStudyHealth(): Promise<StudyHealth | null> {
   const fresh = new Set<string>();
   const freshSince = Date.now() - 96 * 3600 * 1000;
   const gridEnd = new Date(Date.now() + 120 * 86400 * 1000).toISOString().slice(0, 10);
+  const load = new Map<string, { calls: number; failed: number; mesh: number }>();
   for (const r of runs) {
     const local = brt(r.run_at);
+    const l = load.get(local.slice(0, 13)) ?? { calls: 0, failed: 0, mesh: 0 };
+    l.calls += 1;
+    if (r.status === "blocked" || r.status === "error") l.failed += 1;
+    if (r.layer === "D") l.mesh += 1;
+    load.set(local.slice(0, 13), l);
     if (r.layer === "A") {
       const key = local.slice(0, 13);
       const cell = panel.get(key) ?? { ok: 0, total: 0 };
@@ -655,7 +675,8 @@ export async function getStudyHealth(): Promise<StudyHealth | null> {
     Array.from({ length: 24 }, (_, hour) => {
       const key = `${day}T${String(hour).padStart(2, "0")}`;
       const cell = panel.get(key) ?? { ok: 0, total: 0 };
-      return { day, hour, ...cell, future: key > nowBrt.slice(0, 13) };
+      const l = load.get(key) ?? { calls: 0, failed: 0, mesh: 0 };
+      return { day, hour, ...cell, ...l, future: key > nowBrt.slice(0, 13) };
     })
   );
 

@@ -12,7 +12,26 @@ const LAYER_LABEL: Record<string, string> = {
   A: "A · painel horário",
   B: "B · grade de datas",
   C: "C · sob demanda",
+  D: "D · malha Brasil",
 };
+
+const LOAD_BUCKETS = [
+  [0, 50],
+  [50, 100],
+  [100, 150],
+  [150, 200],
+  [200, Infinity],
+] as const;
+
+function loadTone(calls: number, failed: number, future: boolean) {
+  if (future) return "bg-[#111318]/5";
+  if (calls === 0) return "bg-white border border-[#111318]/10";
+  if (failed > 0) return "bg-[#B3261E]";
+  if (calls >= 150) return "bg-[#111318]";
+  if (calls >= 100) return "bg-[#111318]/70";
+  if (calls >= 50) return "bg-[#111318]/45";
+  return "bg-[#111318]/20";
+}
 
 function cellTone(ok: number, total: number, future: boolean) {
   if (future) return "bg-[#111318]/5";
@@ -100,6 +119,71 @@ export function StudyHealth({ h }: { h: Health | null }) {
           <Legend tone="bg-[#0B7A48]" label="< 50%" />
           <Legend tone="bg-[#111318]" label="sem coleta" />
         </div>
+      </div>
+
+      <div>
+        <div className="mb-1 text-xs font-medium text-[#111318]/70">
+          Capacidade × bloqueios: buscas por hora (todas as camadas) e horas com bloqueio/erro do Google
+        </div>
+        <div className="overflow-x-auto">
+          <table className="border-separate border-spacing-[2px] text-[10px] text-[#111318]/60">
+            <tbody>
+              {h.days.map((day) => (
+                <tr key={day}>
+                  <td className="pr-2 font-mono">{formatDay(day)}</td>
+                  {h.hours
+                    .filter((c) => c.day === day)
+                    .map((c) => (
+                      <td
+                        key={c.hour}
+                        title={`${formatDay(day)} ${String(c.hour).padStart(2, "0")}h: ${c.calls} buscas (${c.mesh} da malha), ${c.failed} bloqueio/erro`}
+                        className={`h-5 w-5 rounded-sm ${loadTone(c.calls, c.failed, c.future)}`}
+                      />
+                    ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-[#111318]/70">
+          <Legend tone="bg-[#111318]/20" label="< 50/h" />
+          <Legend tone="bg-[#111318]/45" label="50–100" />
+          <Legend tone="bg-[#111318]/70" label="100–150" />
+          <Legend tone="bg-[#111318]" label="≥ 150" />
+          <Legend tone="bg-[#B3261E]" label="teve bloqueio/erro" />
+        </div>
+
+        <table className="mt-3 w-full max-w-xl text-left text-sm">
+          <thead>
+            <tr className="border-b border-[#111318]/10 text-[#111318]/60">
+              <th className="pb-2 font-medium">Buscas na hora</th>
+              <th className="pb-2 text-right font-medium">Horas</th>
+              <th className="pb-2 text-right font-medium">Horas com falha</th>
+              <th className="pb-2 text-right font-medium">Falhas / buscas</th>
+            </tr>
+          </thead>
+          <tbody className="text-[#111318]">
+            {LOAD_BUCKETS.map(([lo, hi]) => {
+              const hrs = past.filter((c) => c.calls > 0 && c.calls >= lo && c.calls < hi);
+              if (!hrs.length) return null;
+              const calls = hrs.reduce((a, c) => a + c.calls, 0);
+              const failed = hrs.reduce((a, c) => a + c.failed, 0);
+              const bad = hrs.filter((c) => c.failed > 0).length;
+              return (
+                <tr key={lo} className="border-b border-[#111318]/5 last:border-0">
+                  <td className="py-1.5">{hi === Infinity ? `${lo}+` : `${lo}–${hi}`}</td>
+                  <td className="py-1.5 text-right font-mono">{hrs.length}</td>
+                  <td className={`py-1.5 text-right font-mono ${bad ? "text-[#B3261E]" : ""}`}>{bad}</td>
+                  <td className="py-1.5 text-right font-mono">{((100 * failed) / calls).toFixed(1)}%</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        <p className="mt-1 text-[11px] text-[#111318]/60">
+          A malha Brasil começa em 10 buscas/h, sobe 2/h a cada hora sem falhas e cai pela metade a cada bloqueio —
+          a faixa em que as falhas começam é o limite prático desta conexão.
+        </p>
       </div>
 
       <div className="overflow-x-auto">
