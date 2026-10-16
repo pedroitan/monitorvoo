@@ -44,7 +44,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 ORIGINS = ("SSA", "GRU", "CGH")
 DESTINATIONS = ("BOG", "MDE", "CTG", "CLO", "BAQ", "SMR", "PEI")
-PANEL_PAIRS = (("GRU", "BOG"), ("GRU", "MDE"), ("GRU", "CTG"), ("SSA", "BOG"))
+# Pares do painel horario: 4 Colombia + SSA-CGH para comparar o comportamento nacional.
+PANEL_PAIRS = (("GRU", "BOG"), ("GRU", "MDE"), ("GRU", "CTG"), ("SSA", "BOG"), ("SSA", "CGH"))
 
 # Os pares de datas do painel ficam fixos por ciclo de 4 semanas, para que a
 # mesma viagem seja observada hora a hora (Q1) e conforme o voo se aproxima.
