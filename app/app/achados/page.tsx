@@ -156,6 +156,19 @@ function headlines(i: Insights) {
       body: `E só existe em ${Math.round((100 * i.direct.with_direct) / i.direct.searches)}% das buscas Brasil ↔ Colômbia.`,
     });
   }
+  if (i.routeRt?.length) {
+    const byKind = (k: string) =>
+      i.routeRt!.filter((r) => r.kind === k).map((r) => num(r.rt_ow_ratio)!).filter((v) => v !== null && v > 0);
+    const med = (a: number[]) => a.sort((x, y) => x - y)[Math.floor(a.length / 2)];
+    const nac = byKind("nacional");
+    const intl = byKind("internacional");
+    if (nac.length >= 2 && intl.length >= 2 && med(nac) - med(intl) > 0.08) {
+      out.push({
+        title: `No Brasil, ida e volta quase não tem desconto`,
+        body: `A ida e volta nacional custa em mediana ${med(nac).toFixed(2).replace(".", ",")}× a só ida (2× = mesmo preço). Nas rotas para a Colômbia, ${med(intl).toFixed(2).replace(".", ",")}× — comprar junto vale a pena.`,
+      });
+    }
+  }
   return out;
 }
 
@@ -218,7 +231,7 @@ export default async function AchadosPage() {
       {/* 1. intradia */}
       <Section
         title="O preço muda durante o dia?"
-        lead="O painel repete as mesmas 36 buscas toda hora. Mudanças abaixo de 2% são quase sempre conversão de câmbio nas rotas que saem da Colômbia; acima disso, é a tarifa que mudou."
+        lead="O painel repete as mesmas 45 buscas toda hora: 4 pares Brasil–Colômbia e, desde 16/10, SSA–CGH para comparar com o comportamento nacional. Nas internacionais, mudanças abaixo de 2% são quase sempre conversão de câmbio; acima disso, é a tarifa que mudou."
       >
         {intr && intr.pairs > 0 ? (
           <>
@@ -392,6 +405,69 @@ export default async function AchadosPage() {
               A grade passou a coletar ida e volta de 7, 10 e 14 dias (GRU e SSA → Bogotá, Medellín e Cartagena).
               Esta tabela aparece conforme as datas forem cobertas, em cerca de 5 dias.
             </Pending>
+          )}
+        </div>
+
+        <div>
+          <div className="mb-2 text-sm font-semibold">Em todas as rotas coletadas</div>
+          <p className="mb-3 text-sm text-mut">
+            Ida e volta ÷ só ida do mesmo trecho, mesma data de voo e mesmo dia de coleta.{" "}
+            <span className="font-semibold text-texto">2,00× = sem desconto</span> (a volta custa o mesmo que a ida);
+            abaixo disso, comprar junto sai mais barato.
+          </p>
+          {i.routeRt === null ? (
+            <Pending>
+              Esta tabela precisa da view <code>insight_route_rt</code> — aplique{" "}
+              <code>supabase/migrations/0006_insights_routes.sql</code> no SQL Editor do Supabase.
+            </Pending>
+          ) : i.routeRt.length ? (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {(["nacional", "internacional"] as const).map((kind) => {
+                const rows = i.routeRt!
+                  .filter((r) => r.kind === kind)
+                  .sort((a, b) => num(b.rt_ow_ratio)! - num(a.rt_ow_ratio)!)
+                  .slice(0, 20);
+                if (!rows.length) return null;
+                return (
+                  <div key={kind}>
+                    <div className="mb-2 text-[13px] font-semibold uppercase tracking-wide text-mut">
+                      {kind === "nacional" ? "Rotas nacionais" : "Rotas internacionais"}
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      {rows.map((r) => {
+                        const v = num(r.rt_ow_ratio);
+                        const discount = v !== null && v < 1.95;
+                        return (
+                          <div
+                            key={`${r.origin}-${r.destination}`}
+                            className="grid grid-cols-[92px_1fr_64px_150px] items-center gap-2 text-sm"
+                            title={`${r.days} dias comparados`}
+                          >
+                            <span className="font-mono font-semibold">
+                              {r.origin}-{r.destination}
+                            </span>
+                            <div className="h-4 rounded bg-grade">
+                              <div
+                                className={`h-4 rounded ${discount ? "bg-[#9FD8B8]" : "bg-faixa-forte"}`}
+                                style={{ width: `${Math.min(100, ((v ?? 2) / 2.2) * 100)}%` }}
+                              />
+                            </div>
+                            <span className={`text-right font-mono text-[13px] ${discount ? "font-semibold text-destaque-texto" : "text-texto"}`}>
+                              {v === null ? "—" : `${v.toFixed(2).replace(".", ",")}×`}
+                            </span>
+                            <span className="text-right font-mono text-xs text-mut">
+                              {brl(r.rt_median)} / {brl(r.ow_median)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <Pending>Acumulando dias com ida e volta e só ida na mesma rota.</Pending>
           )}
         </div>
       </Section>

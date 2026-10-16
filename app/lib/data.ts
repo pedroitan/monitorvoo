@@ -878,6 +878,15 @@ export type Insights = {
   airlines: { airline: string; cheapest: number; present: number; searches: number }[];
   direct: { searches: number; with_direct: number; direct_ratio: Num } | null;
   departure: { period: string; rel: Num; cheapest: number; n: number }[];
+  routeRt: {
+    origin: string;
+    destination: string;
+    kind: string | null;
+    days: number;
+    rt_ow_ratio: Num;
+    rt_median: Num;
+    ow_median: Num;
+  }[] | null; // null = migration 0006 ainda nao aplicada
 };
 
 /** Numeric do Postgres chega como string pelo PostgREST. */
@@ -902,6 +911,8 @@ export async function getInsights(): Promise<Insights | null> {
     "insight_departure",
   ] as const;
   const res = await Promise.all(views.map((v) => supabase.from(v).select("*")));
+  // 0006: opcional — a pagina funciona sem ela, so some a tabela por rota.
+  const routeRtRes = await supabase.from("insight_route_rt").select("*");
   if (res.some((r) => r.error)) return null;
   const [
     intraday, hourly, sampling, rtVsOw, openJaw, destinations, weekday,
@@ -922,5 +933,6 @@ export async function getInsights(): Promise<Insights | null> {
     airlines: airlines as Insights["airlines"],
     direct: (direct[0] as Insights["direct"]) ?? null,
     departure: departure as Insights["departure"],
+    routeRt: routeRtRes.error ? null : (routeRtRes.data as Insights["routeRt"]),
   };
 }
