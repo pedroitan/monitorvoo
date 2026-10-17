@@ -23,7 +23,7 @@
 - Google Flights multi-city ("entra por uma cidade, sai por outra") nao devolve resultados na pagina; open-jaw e calculado somando dois so ida
 - Camada D (malha Brasil): trechos com >= 30 voos/mes na view `anac_routes_latest` x antecedencias 7/21/45/90, so ida; orcamento por hora em `logs/study.state` (`brazil_budget`): comeca em 10, +2 por hora limpa, metade a cada bloqueio, teto `STUDY_BRAZIL_MAX`. Rotas novas entram com priority 3 (fora da home). Capacidade x bloqueios em `/qualidade`
 - `.env` local: `TRAVELPAYOUTS_TOKEN` e `SERPAPI_KEY` estao VAZIOS (contas nunca criadas)
-- `/achados`: conclusoes do estudo, lidas das views `insight_*` (migration 0004, agregam no banco, janela de 30 dias; migration 0006 corrige `insight_rt_vs_ow` para pares BR-BR e adiciona `insight_route_rt` = RT/só ida por rota em todas as fontes)
+- `/achados`: conclusoes do estudo, lidas das views `insight_*` (migration 0004, agregam no banco, janela de 30 dias; migration 0006 corrige `insight_rt_vs_ow` para pares BR-BR e adiciona `insight_route_rt` = RT/só ida por rota em todas as fontes; migration 0007 adiciona `insight_kind_intraday` = intradia nacional x internacional)
 
 ## Supabase
 

@@ -887,6 +887,18 @@ export type Insights = {
     rt_median: Num;
     ow_median: Num;
   }[] | null; // null = migration 0006 ainda nao aplicada
+  kindIntraday: {
+    kind: string | null;
+    series: number;
+    pairs: number;
+    changes: number;
+    big_changes: number;
+    big_night: number;
+    change_median_pct: Num;
+    reverted: number;
+    day_amp_median: Num;
+    day_amp_over5_share: Num;
+  }[] | null; // null = migration 0007 ainda nao aplicada
 };
 
 /** Numeric do Postgres chega como string pelo PostgREST. */
@@ -913,6 +925,7 @@ export async function getInsights(): Promise<Insights | null> {
   const res = await Promise.all(views.map((v) => supabase.from(v).select("*")));
   // 0006: opcional — a pagina funciona sem ela, so some a tabela por rota.
   const routeRtRes = await supabase.from("insight_route_rt").select("*");
+  const kindRes = await supabase.from("insight_kind_intraday").select("*");
   if (res.some((r) => r.error)) return null;
   const [
     intraday, hourly, sampling, rtVsOw, openJaw, destinations, weekday,
@@ -934,5 +947,6 @@ export async function getInsights(): Promise<Insights | null> {
     direct: (direct[0] as Insights["direct"]) ?? null,
     departure: departure as Insights["departure"],
     routeRt: routeRtRes.error ? null : (routeRtRes.data as Insights["routeRt"]),
+    kindIntraday: kindRes.error ? null : (kindRes.data as Insights["kindIntraday"]),
   };
 }

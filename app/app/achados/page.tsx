@@ -251,6 +251,62 @@ export default async function AchadosPage() {
               />
             </div>
 
+            {i.kindIntraday === null ? (
+              <Pending>
+                O comparativo nacional × internacional precisa da view <code>insight_kind_intraday</code> — aplique{" "}
+                <code>supabase/migrations/0007_insights_kind.sql</code> no SQL Editor do Supabase.
+              </Pending>
+            ) : (
+              i.kindIntraday.length > 0 && (
+                <div>
+                  <div className="mb-2 text-sm font-semibold">Nacional × internacional</div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[560px] text-sm">
+                      <thead>
+                        <tr className="border-b border-borda text-left text-[13px] text-mut">
+                          <th className="py-2 font-semibold">Rotas</th>
+                          <th className="py-2 text-right font-semibold">Horas c/ mudança</th>
+                          <th className="py-2 text-right font-semibold">Mudanças de tarifa</th>
+                          <th className="py-2 text-right font-semibold">% delas 0–7h</th>
+                          <th className="py-2 text-right font-semibold">Tamanho típico</th>
+                          <th className="py-2 text-right font-semibold">Dias variando &gt;5%</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(["nacional", "internacional"] as const).map((k) => {
+                          const r = i.kindIntraday!.find((x) => x.kind === k);
+                          if (!r) return null;
+                          return (
+                            <tr key={k} className="border-b border-grade">
+                              <td className="py-2 font-semibold">
+                                {k === "nacional" ? "Brasil (SSA⇄CGH)" : "Brasil ⇄ Colômbia"}
+                              </td>
+                              <td className="py-2 text-right font-mono">
+                                {r.pairs ? `${Math.round((100 * r.changes) / r.pairs)}%` : "—"}
+                              </td>
+                              <td className="py-2 text-right font-mono">{r.big_changes}</td>
+                              <td className="py-2 text-right font-mono text-mut">
+                                {r.big_changes ? `${Math.round((100 * r.big_night) / r.big_changes)}%` : "—"}
+                              </td>
+                              <td className="py-2 text-right font-mono text-mut">
+                                {num(r.change_median_pct) === null ? "—" : `${num(r.change_median_pct)!.toFixed(1).replace(".", ",")}%`}
+                              </td>
+                              <td className="py-2 text-right font-mono text-mut">
+                                {num(r.day_amp_over5_share) === null ? "—" : `${Math.round(100 * num(r.day_amp_over5_share)!)}%`}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="mt-2 text-xs text-mut">
+                    O nacional entrou no painel em 16/10 — os primeiros dias ainda são amostra pequena.
+                  </p>
+                </div>
+              )
+            )}
+
             <div>
               <div className="mb-2 text-sm font-semibold">Mudanças por hora do dia (Brasília)</div>
               <div className="flex h-36 items-end gap-[3px]">
