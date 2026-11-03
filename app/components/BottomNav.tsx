@@ -45,6 +45,17 @@ const ITEMS = [
     active: (p: string) => p.startsWith("/achados"),
   },
   {
+    href: "/viagem",
+    label: "Viagem",
+    icon: (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M8 2v4M16 2v4M3 10h18" />
+      </>
+    ),
+    active: (p: string) => p.startsWith("/viagem"),
+  },
+  {
     href: "/alertas",
     label: "Alertas",
     icon: (

@@ -251,8 +251,10 @@ def layer_d(client, now: datetime, budget: int) -> list[Query]:
 def layer_c(client) -> list[Query]:
     if client is None:
         return []
+    # pedidos com viagem futura continuam pending e sao recoletados toda hora
     rows = (
         client.table("search_requests").select("*").eq("status", "pending")
+        .gte("out_date", today_brt().isoformat())
         .order("requested_at").limit(MAX_REQUESTS_PER_HOUR).execute().data
     )
     out = []
@@ -433,9 +435,10 @@ def main() -> int:
             status = runner.run(q)
             if q.request_id and client is not None and q.request_id not in done_requests:
                 done_requests.add(q.request_id)
-                client.table("search_requests").update(
-                    {"status": "done" if status in ("ok", "empty") else "error"}
-                ).eq("id", q.request_id).execute()
+                # tracking continuo: so conclui quando a viagem ja passou
+                end = q.ret or q.out
+                if status in ("ok", "empty") and end < today_brt():
+                    client.table("search_requests").update({"status": "done"}).eq("id", q.request_id).execute()
             if runner.blocks_in_row >= MAX_CONSECUTIVE_BLOCKS:
                 log.error("%d bloqueios seguidos; pausando ate a proxima hora", runner.blocks_in_row)
                 break

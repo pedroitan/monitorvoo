@@ -581,9 +581,76 @@ export function formatCollected(iso: string | null | undefined) {
   });
 }
 
+// ---------- acompanhamento de viagens (search_requests, camada C) ----------
+
+export type TripRequest = {
+  id: number;
+  origin: string;
+  destination: string;
+  out_date: string;
+  ret_date: string | null;
+  requested_at: string;
+  status: string;
+};
+
+export type TripRun = {
+  id: number;
+  run_at: string;
+  trip_type: string;
+  return_date: string | null;
+  status: string;
+  min_price: number | null;
+  n_options: number | null;
+};
+
+export type TripOption = {
+  airline: string | null;
+  flight_number: string | null;
+  departure: string | null;
+  arrival: string | null;
+  duration_min: number | null;
+  stops: number | null;
+  price_brl: number | null;
+};
+
+export async function getTripRequests(): Promise<TripRequest[]> {
+  const { data, error } = await supabase
+    .from("search_requests")
+    .select("*")
+    .order("out_date", { ascending: true });
+  return error ? [] : (data as TripRequest[]);
+}
+
+/** Rodadas coletadas para uma perna: origin→destination saindo em flightDate. */
+export async function getTripRuns(
+  origin: string,
+  destination: string,
+  flightDate: string
+): Promise<TripRun[]> {
+  const { data, error } = await supabase
+    .from("collection_runs")
+    .select("id, run_at, trip_type, return_date, status, min_price, n_options")
+    .eq("origin", origin)
+    .eq("destination", destination)
+    .eq("flight_date", flightDate)
+    .in("status", ["ok", "empty"])
+    .order("run_at", { ascending: true });
+  return error ? [] : (data as TripRun[]);
+}
+
+/** Opcoes de voo das rodadas mais recentes (uma por perna). */
+export async function getRunOptions(runId: number): Promise<TripOption[]> {
+  const { data, error } = await supabase
+    .from("fare_observations")
+    .select("airline, flight_number, departure, arrival, duration_min, stops, price_brl")
+    .eq("run_id", runId)
+    .order("price_brl", { ascending: true });
+  return error ? [] : (data as TripOption[]);
+}
+
 // ---------- saude da coleta do estudo Colombia (collection_runs) ----------
 
-export const STUDY_PANEL_PER_HOUR = 36; // 3 pares de datas x 4 rotas x 3 buscas
+export const STUDY_PANEL_PER_HOUR = 45; // 3 pares de datas x 5 rotas x 3 buscas (4 Colombia + SSA-CGH)
 const STUDY_GRID_TOTAL = 3 * 7 * 2 * 114; // origens x destinos x sentidos x datas D+7..D+120
 const BRT_OFFSET_MS = 3 * 3600 * 1000;
 
