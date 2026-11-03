@@ -11,11 +11,11 @@ import {
   cityName,
   countryName,
   formatBRL,
-  getAllObservations,
   getPromoEvents,
+  getRouteDailyMin,
   getRoutes,
   routeCode,
-  summarizeRoutes,
+  summarizeRoutesDaily,
 } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
@@ -32,14 +32,14 @@ export default async function Home({
   searchParams: Promise<{ filtro?: string }>;
 }) {
   const { filtro = "todas" } = await searchParams;
-  const [allRoutes, obs, promos] = await Promise.all([
+  const [allRoutes, dailyMin, promos] = await Promise.all([
     getRoutes(),
-    getAllObservations(),
+    getRouteDailyMin("round-trip", 30),
     getPromoEvents(),
   ]);
   const routes = allRoutes.filter((r) => (r.priority ?? 1) < BRAZIL_MESH_PRIORITY);
   const meshCount = allRoutes.length - routes.length;
-  const summaries = summarizeRoutes(routes, obs);
+  const summaries = summarizeRoutesDaily(routes, dailyMin);
   const filtered =
     filtro === "todas"
       ? summaries

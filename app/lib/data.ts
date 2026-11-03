@@ -300,6 +300,28 @@ export async function getAllObservations(): Promise<Observation[]> {
   }
 }
 
+/** Menor preco diario por rota (view route_daily_min, migration 0008).
+ * Substitui baixar a fare_observations inteira na home. */
+export async function getRouteDailyMin(
+  trip: string = "round-trip",
+  lead: number = 30
+): Promise<{ route_id: string; day: string; price: number }[]> {
+  try {
+    const rows = await fetchAll<{ route_id: string; day: string; price: number }>(() =>
+      supabase
+        .from("route_daily_min")
+        .select("route_id, day, price")
+        .eq("trip_type", trip)
+        .eq("lead_days", lead)
+        .order("route_id")
+        .order("day")
+    );
+    return rows;
+  } catch {
+    return []; // view ainda nao aplicada
+  }
+}
+
 /** Observacoes dos ultimos N dias (padrao 1 dia = ciclo de coleta mais recente). */
 export async function getLatestFlightOptions(days: number = 1): Promise<Observation[]> {
   const since = new Date();
@@ -522,6 +544,27 @@ export function airlineTable(obs: Observation[]) {
       };
     })
     .sort((a, b) => a.today - b.today);
+}
+
+/** Resumo por rota para a home a partir dos minimos diarios ja agregados. */
+export function summarizeRoutesDaily(
+  routes: Route[],
+  rows: { route_id: string; day: string; price: number }[]
+) {
+  const byRoute = new Map<string, { day: string; price: number }[]>();
+  for (const r of rows) {
+    const list = byRoute.get(r.route_id) ?? [];
+    list.push(r);
+    byRoute.set(r.route_id, list);
+  }
+  return routes.map((r) => {
+    const daily = (byRoute.get(r.id) ?? []).sort((a, b) => a.day.localeCompare(b.day));
+    return {
+      route: r,
+      stats: routeStats(daily),
+      spark: daily.map((d) => d.price),
+    };
+  });
 }
 
 /** Resumo por rota para a home: stats + sparkline de uma serie padrao. */
@@ -795,94 +838,85 @@ export type QualityStats = {
   routesWithoutData: Route[];
 };
 
-export async function getQualityStats(): Promise<QualityStats> {
-  const [routes, obs] = await Promise.all([getRoutes(), getAllObservations()]);
-
-  const routesWithData = new Set<string>();
-  const byRoute = new Map<string, Observation[]>();
-  const byDay = new Map<string, number>();
-  const byAirline = new Map<string, number>();
-  const byLeadTrip = new Map<string, number>();
-  const airlineSet = new Set<string>();
-
-  for (const o of obs) {
-    routesWithData.add(o.route_id);
-    const list = byRoute.get(o.route_id) ?? [];
-    list.push(o);
-    byRoute.set(o.route_id, list);
-
-    const day = o.collected_at.slice(0, 10);
-    byDay.set(day, (byDay.get(day) ?? 0) + 1);
-
-    byAirline.set(o.airline, (byAirline.get(o.airline) ?? 0) + 1);
-    airlineSet.add(o.airline);
-
-    const lt = `${o.lead_days}|${o.trip_type}`;
-    byLeadTrip.set(lt, (byLeadTrip.get(lt) ?? 0) + 1);
+/** null = migration 0008 (views quality_*) ainda nao aplicada. */
+export async function getQualityStats(): Promise<QualityStats | null> {
+  type QRoute = {
+    route_id: string;
+    origin: string;
+    destination: string;
+    kind: "nacional" | "internacional";
+    total: number;
+    first: string | null;
+    last: string | null;
+    days: number;
+    airlines: string[] | null;
+    leads: number[] | null;
+    one_way: number;
+    round_trip: number;
+    min: number | null;
+    max: number | null;
+    median: number | string | null;
+  };
+  let routes: Route[];
+  let qRoutes: QRoute[];
+  let dailyVolume: { day: string; count: number }[];
+  let airlineCounts: { airline: string; count: number }[];
+  let leadTripCounts: { lead: number; trip: string; count: number }[];
+  try {
+    [routes, qRoutes, dailyVolume, airlineCounts, leadTripCounts] = await Promise.all([
+      getRoutes(),
+      fetchAll<QRoute>(() => supabase.from("quality_routes").select("*")),
+      fetchAll<{ day: string; count: number }>(() =>
+        supabase.from("quality_daily").select("day, count").order("day")
+      ),
+      fetchAll<{ airline: string; count: number }>(() =>
+        supabase.from("quality_airlines").select("airline, count").order("count", { ascending: false })
+      ),
+      fetchAll<{ lead: number; trip: string; count: number }>(() =>
+        supabase.from("quality_lead_trip").select("lead, trip, count")
+      ),
+    ]);
+  } catch {
+    return null;
   }
 
-  const routeStats: QualityRouteStats[] = routes
-    .map((r) => {
-      const list = byRoute.get(r.id) ?? [];
-      const days = new Set(list.map((o) => o.collected_at.slice(0, 10)));
-      const prices = list.map((o) => o.price_brl).sort((a, b) => a - b);
-      const tripsMap = new Map<string, number>();
-      const leadsSet = new Set<number>();
-      const airlinesSet = new Set<string>();
-      for (const o of list) {
-        tripsMap.set(o.trip_type, (tripsMap.get(o.trip_type) ?? 0) + 1);
-        leadsSet.add(o.lead_days);
-        airlinesSet.add(o.airline);
-      }
-      const sortedDates = list
-        .map((o) => o.collected_at)
-        .sort((a, b) => a.localeCompare(b));
-      return {
-        routeId: r.id,
-        code: routeCode(r),
-        origin: r.origin,
-        destination: r.destination,
-        kind: r.kind,
-        total: list.length,
-        first: sortedDates[0] ?? null,
-        last: sortedDates.at(-1) ?? null,
-        days: days.size,
-        airlines: [...airlinesSet].sort(),
-        trips: [...tripsMap.entries()].map(([type, count]) => ({ type, count })),
-        leads: [...leadsSet].sort((a, b) => a - b),
-        min: prices[0] ?? 0,
-        max: prices.at(-1) ?? 0,
-        median: percentile(prices, 0.5),
-      };
-    })
+  const routeStats: QualityRouteStats[] = qRoutes
+    .map((r) => ({
+      routeId: r.route_id,
+      code: `${r.origin}-${r.destination}`,
+      origin: r.origin,
+      destination: r.destination,
+      kind: r.kind,
+      total: r.total,
+      first: r.first,
+      last: r.last,
+      days: r.days,
+      airlines: (r.airlines ?? []).sort(),
+      trips: [
+        { type: "one-way", count: r.one_way },
+        { type: "round-trip", count: r.round_trip },
+      ].filter((t) => t.count > 0),
+      leads: (r.leads ?? []).sort((a, b) => a - b),
+      min: num(r.min) ?? 0,
+      max: num(r.max) ?? 0,
+      median: num(r.median) ?? 0,
+    }))
     .sort((a, b) => b.total - a.total);
 
-  const dailyVolume = [...byDay.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([day, count]) => ({ day, count }));
-
-  const airlineCounts = [...byAirline.entries()]
-    .map(([airline, count]) => ({ airline, count }))
-    .sort((a, b) => b.count - a.count);
-
-  const leadTripCounts = [...byLeadTrip.entries()]
-    .map(([key, count]) => {
-      const [lead, trip] = key.split("|");
-      return { lead: Number(lead), trip, count };
-    })
-    .sort((a, b) => a.lead - b.lead || a.trip.localeCompare(b.trip));
+  const withData = new Set(qRoutes.filter((r) => r.total > 0).map((r) => r.route_id));
+  leadTripCounts.sort((a, b) => a.lead - b.lead || a.trip.localeCompare(b.trip));
 
   return {
-    totalObservations: obs.length,
+    totalObservations: dailyVolume.reduce((s, d) => s + d.count, 0),
     activeRoutes: routes.length,
-    routesWithData: routesWithData.size,
-    collectionDays: byDay.size,
-    airlines: airlineSet.size,
+    routesWithData: withData.size,
+    collectionDays: dailyVolume.length,
+    airlines: airlineCounts.length,
     dailyVolume,
     airlineCounts,
     leadTripCounts,
     routes: routeStats,
-    routesWithoutData: routes.filter((r) => !routesWithData.has(r.id)),
+    routesWithoutData: routes.filter((r) => !withData.has(r.id)),
   };
 }
 
