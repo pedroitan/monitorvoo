@@ -118,16 +118,41 @@ function Airport({ code }: { code: string }) {
   );
 }
 
+const COLOMBIA = new Set(["BOG", "MDE", "CTG", "CLO", "SMR", "BAQ", "PEI"]);
+
 function headlines(i: Insights) {
   const out: { title: string; body: string }[] = [];
   const rt = i.rtVsOw.filter((r) => num(r.rt_median) && num(r.two_ow_median));
-  if (rt.length) {
-    const diffs = rt.map((r) => (num(r.rt_median)! / num(r.two_ow_median)! - 1) * 100);
-    const cheaper = rt.reduce((s, r) => s + r.rt_cheaper, 0);
-    const n = rt.reduce((s, r) => s + r.n, 0);
+  const rtCol = rt.filter((r) => COLOMBIA.has(r.destination) || COLOMBIA.has(r.origin));
+  const rtNac = rt.filter((r) => !COLOMBIA.has(r.destination) && !COLOMBIA.has(r.origin));
+  if (rtCol.length) {
+    const diffs = rtCol.map((r) => (num(r.rt_median)! / num(r.two_ow_median)! - 1) * 100);
+    const cheaper = rtCol.reduce((s, r) => s + r.rt_cheaper, 0);
+    const n = rtCol.reduce((s, r) => s + r.n, 0);
     out.push({
       title: `Ida e volta: ${pct(diffs.reduce((a, b) => a + b, 0) / diffs.length)} vs. duas só ida`,
       body: `Para a Colômbia, a passagem de ida e volta saiu mais barata que comprar dois trechos separados em ${Math.round((100 * cheaper) / n)}% das ${n} comparações feitas na mesma hora.`,
+    });
+  }
+  if (rtNac.length) {
+    const diffs = rtNac.map((r) => (num(r.rt_median)! / num(r.two_ow_median)! - 1) * 100);
+    const avg = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+    const n = rtNac.reduce((s, r) => s + r.n, 0);
+    out.push({
+      title: "No nacional, ida e volta é só a soma dos trechos",
+      body: `Em SSA⇄CGH, comprar junto custa em média ${pct(avg, 1).replace("+", "")} em relação a dois trechos (${n} comparações na mesma hora) — desconto praticamente zero, diferente da Colômbia. Empatando, dois trechos dão mais flexibilidade para remarcar uma perna só.`,
+    });
+  }
+  const kn = i.kindIntraday?.find((r) => r.kind === "nacional");
+  const ki = i.kindIntraday?.find((r) => r.kind === "internacional");
+  if (kn && ki && kn.pairs > 500) {
+    const shareN = Math.round((100 * kn.changes) / kn.pairs);
+    const shareI = Math.round((100 * ki.changes) / ki.pairs);
+    const medN = num(kn.change_median_pct);
+    const ampN = num(kn.day_amp_over5_share);
+    out.push({
+      title: "Tarifa nacional muda menos, mas salta muito mais",
+      body: `Em SSA⇄CGH, só ${shareN}% das horas mudam de preço (Colômbia: ${shareI}%), mas quando muda, a variação típica é de ${medN === null ? "—" : medN.toFixed(1).replace(".", ",")}% — mais de 20× a internacional —${ampN === null ? "" : ` e ${Math.round(100 * ampN)}% dos dias variam mais de 5%`}. De madrugada quase nada acontece nos dois mercados.`,
     });
   }
   const gru = i.destinations.filter((d) => d.origin === "GRU").sort((a, b) => num(a.median_price)! - num(b.median_price)!);
@@ -231,7 +256,7 @@ export default async function AchadosPage() {
       {/* 1. intradia */}
       <Section
         title="O preço muda durante o dia?"
-        lead="O painel repete as mesmas 45 buscas toda hora: 4 pares Brasil–Colômbia e, desde 16/10, SSA–CGH para comparar com o comportamento nacional. Nas internacionais, mudanças abaixo de 2% são quase sempre conversão de câmbio; acima disso, é a tarifa que mudou."
+        lead="O painel repete as mesmas 45 buscas toda hora: 4 pares Brasil–Colômbia e, desde 16/10, SSA–CGH para comparar com o comportamento nacional. Nas internacionais, mudanças abaixo de 2% são quase sempre conversão de câmbio; acima disso, é a tarifa que mudou. No nacional não há câmbio — toda variação é tarifa."
       >
         {intr && intr.pairs > 0 ? (
           <>
@@ -301,7 +326,8 @@ export default async function AchadosPage() {
                     </table>
                   </div>
                   <p className="mt-2 text-xs text-mut">
-                    O nacional entrou no painel em 16/10 — os primeiros dias ainda são amostra pequena.
+                    O nacional ainda é medido por uma rota só (SSA⇄CGH) — o padrão já se repete há semanas, mas
+                    não vale generalizar para todo o doméstico.
                   </p>
                 </div>
               )
