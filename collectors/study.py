@@ -255,8 +255,13 @@ def layer_c(client) -> list[Query]:
     rows = (
         client.table("search_requests").select("*").eq("status", "pending")
         .gte("out_date", today_brt().isoformat())
-        .order("requested_at").limit(MAX_REQUESTS_PER_HOUR).execute().data
+        .order("requested_at").limit(50).execute().data
     )
+    if len(rows) > MAX_REQUESTS_PER_HOUR:
+        # mais pedidos que o limite/hora: a fatia desliza a cada hora,
+        # entao todos entram ao longo do dia (sem os antigos travarem a fila)
+        off = (datetime.now(tz=timezone.utc).hour * MAX_REQUESTS_PER_HOUR) % len(rows)
+        rows = (rows + rows)[off : off + MAX_REQUESTS_PER_HOUR]
     out = []
     for r in rows:
         dep = date.fromisoformat(r["out_date"])
@@ -265,7 +270,16 @@ def layer_c(client) -> list[Query]:
         if ret:
             out.append(Query("C", r["origin"], r["destination"], dep, request_id=r["id"]))
             out.append(Query("C", r["destination"], r["origin"], ret, request_id=r["id"]))
-    return out
+    # pedidos diferentes geram pernas iguais (ex.: mesma so ida com voltas
+    # diferentes): cada busca unica e feita uma so vez por rodada
+    seen: set[tuple] = set()
+    uniq = []
+    for q in out:
+        k = (q.origin, q.destination, q.out, q.ret)
+        if k not in seen:
+            seen.add(k)
+            uniq.append(q)
+    return uniq
 
 
 class Runner:
