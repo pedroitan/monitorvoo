@@ -1027,7 +1027,10 @@ export async function getInsights(): Promise<Insights | null> {
   // 0006: opcional — a pagina funciona sem ela, so some a tabela por rota.
   const routeRtRes = await supabase.from("insight_route_rt").select("*");
   const kindRes = await supabase.from("insight_kind_intraday").select("*");
-  if (res.some((r) => r.error)) return null;
+  // Se TODAS falharem, as views nao existem (migration 0004 pendente). Se so
+  // algumas falharem (ex.: timeout esporadico), as secoes delas ficam vazias
+  // em vez de derrubar a pagina inteira.
+  if (res.every((r) => r.error)) return null;
   const [
     intraday, hourly, sampling, rtVsOw, openJaw, destinations, weekday,
     month, lead, gridRt, emptyPairs, airlines, direct, departure,
