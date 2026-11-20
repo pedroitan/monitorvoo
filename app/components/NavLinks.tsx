@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/achados", label: "Achados" },
   { href: "/viagem", label: "Viagem" },
   { href: "/matriz", label: "Matriz" },
+  { href: "/colombia/marco", label: "Colômbia" },
   { href: "/alertas", label: "Alertas" },
 ];
 
