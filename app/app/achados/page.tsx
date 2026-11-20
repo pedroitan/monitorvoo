@@ -138,10 +138,27 @@ function headlines(i: Insights) {
     const diffs = rtNac.map((r) => (num(r.rt_median)! / num(r.two_ow_median)! - 1) * 100);
     const avg = diffs.reduce((a, b) => a + b, 0) / diffs.length;
     const n = rtNac.reduce((s, r) => s + r.n, 0);
+    const cheaper = rtNac.reduce((s, r) => s + r.rt_cheaper, 0);
     out.push({
       title: "No nacional, ida e volta é só a soma dos trechos",
-      body: `Em SSA⇄CGH, comprar junto custa em média ${pct(avg, 1).replace("+", "")} em relação a dois trechos (${n} comparações na mesma hora) — desconto praticamente zero, diferente da Colômbia. Empatando, dois trechos dão mais flexibilidade para remarcar uma perna só.`,
+      body: `Em SSA⇄CGH, comprar junto custa em média ${pct(avg, 1).replace("+", "")} em relação a dois trechos (${n} comparações na mesma hora) — desconto praticamente zero, diferente da Colômbia. Quando sai mais barato (${Math.round((100 * cheaper) / n)}% das rodadas), são poucos reais; empatando, dois trechos dão mais flexibilidade para remarcar uma perna só.`,
     });
+  }
+  const lp = i.leadPanel;
+  const lpNac = lp?.filter((r) => r.kind === "nacional") ?? [];
+  const lpLast = lpNac.find((r) => r.bucket === "0-6");
+  const lpRest = lpNac.filter((r) => r.bucket !== "0-6").map((r) => num(r.rel)!).filter((v) => v !== null);
+  const lpIntlLast = lp?.find((r) => r.kind === "internacional" && r.bucket === "0-6");
+  if (lpLast && lpIntlLast && lpRest.length >= 2) {
+    const relLast = num(lpLast.rel);
+    const relBase = [...lpRest].sort((a, b) => a - b)[Math.floor(lpRest.length / 2)];
+    const relIntl = num(lpIntlLast.rel);
+    if (relLast !== null && relIntl !== null && relLast > relBase + 0.08) {
+      out.push({
+        title: `Na última semana, o nacional dispara ${Math.round(relLast * 100)}%`,
+        body: `Comprar dentro dos últimos 7 dias custa em mediana ${Math.round(relLast * 100)}% do preço típico da mesma viagem — comprado com 3+ semanas, ${Math.round(relBase * 100)}%. Na Colômbia o efeito existe, mas é bem menor (${relIntl === null ? "—" : Math.round(relIntl * 100)}%). No nacional, decidir cedo paga muito mais.`,
+      });
+    }
   }
   const kn = i.kindIntraday?.find((r) => r.kind === "nacional");
   const ki = i.kindIntraday?.find((r) => r.kind === "internacional");
@@ -719,6 +736,58 @@ export default async function AchadosPage() {
             fica confiável depois de umas 2 semanas.
           </Pending>
         )}
+
+        <div>
+          <div className="mb-2 text-sm font-semibold">
+            De véspera ou com antecedência — nacional × internacional (painel horário)
+          </div>
+          <p className="mb-3 text-sm text-mut">
+            Cada coleta comparada com a mediana da própria viagem: 100% = preço normal. O painel segue a mesma
+            viagem de longe até a véspera, então mostra o que acontece quando a data se aproxima.
+          </p>
+          {i.leadPanel === null ? (
+            <Pending>
+              Esta tabela precisa da view <code>insight_lead_panel</code> — aplique{" "}
+              <code>supabase/migrations/0012_lead_panel.sql</code> no SQL Editor do Supabase.
+            </Pending>
+          ) : i.leadPanel.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[560px] text-sm">
+                <thead>
+                  <tr className="border-b border-borda text-left text-[13px] text-mut">
+                    <th className="py-2 font-semibold">Comprando a</th>
+                    <th className="py-2 text-right font-semibold">Brasil (SSA⇄CGH)</th>
+                    <th className="py-2 text-right font-semibold">Brasil ⇄ Colômbia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {["0-6", "7-13", "14-20", "21-27", "28-41", "42+"].map((b) => {
+                    const nac = i.leadPanel!.find((r) => r.kind === "nacional" && r.bucket === b);
+                    const intl = i.leadPanel!.find((r) => r.kind === "internacional" && r.bucket === b);
+                    const v = (x?: { rel: string | number | null }) =>
+                      x && num(x.rel) !== null ? `${Math.round(num(x.rel)! * 100)}%` : "—";
+                    const cls = (x?: { rel: string | number | null }) =>
+                      x && num(x.rel) !== null && num(x.rel)! > 1.1
+                        ? "font-semibold text-alto-texto"
+                        : x && num(x.rel) !== null && num(x.rel)! < 0.93
+                          ? "font-semibold text-destaque-texto"
+                          : "text-texto";
+                    return (
+                      <tr key={b} className="border-b border-grade">
+                        <td className="py-2 font-semibold">
+                          {b === "0-6" ? "menos de 1 semana do voo" : b === "42+" ? "6+ semanas" : `${b} dias`}
+                          {nac && <span className="ml-2 text-xs font-normal text-mut">({nac.n} obs.)</span>}
+                        </td>
+                        <td className={`py-2 text-right font-mono ${cls(nac)}`}>{v(nac)}</td>
+                        <td className={`py-2 text-right font-mono ${cls(intl)}`}>{v(intl)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </div>
       </Section>
 
       {/* 7. cias, direto, horario */}

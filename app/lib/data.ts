@@ -1000,6 +1000,15 @@ export type Insights = {
     day_amp_median: Num;
     day_amp_over5_share: Num;
   }[] | null; // null = migration 0007 ainda nao aplicada
+  leadPanel: {
+    kind: string | null;
+    bucket: string;
+    lead_lo: number;
+    lead_hi: number;
+    rel: Num;
+    n: number;
+    series: number;
+  }[] | null; // null = migration 0012 ainda nao aplicada
 };
 
 /** Numeric do Postgres chega como string pelo PostgREST. */
@@ -1027,6 +1036,7 @@ export async function getInsights(): Promise<Insights | null> {
   // 0006: opcional — a pagina funciona sem ela, so some a tabela por rota.
   const routeRtRes = await supabase.from("insight_route_rt").select("*");
   const kindRes = await supabase.from("insight_kind_intraday").select("*");
+  const leadPanelRes = await supabase.from("insight_lead_panel").select("*");
   // Se TODAS falharem, as views nao existem (migration 0004 pendente). Se so
   // algumas falharem (ex.: timeout esporadico), as secoes delas ficam vazias
   // em vez de derrubar a pagina inteira.
@@ -1052,5 +1062,6 @@ export async function getInsights(): Promise<Insights | null> {
     departure: departure as Insights["departure"],
     routeRt: routeRtRes.error ? null : (routeRtRes.data as Insights["routeRt"]),
     kindIntraday: kindRes.error ? null : (kindRes.data as Insights["kindIntraday"]),
+    leadPanel: leadPanelRes.error ? null : (leadPanelRes.data as Insights["leadPanel"]),
   };
 }
