@@ -133,7 +133,11 @@ export default async function MatrizPage() {
                         }`}
                       >
                         {c.sum !== null || c.rt !== null ? (
-                          <>
+                          <Link
+                            href={`/celula?o=SSA&d=${c.o.dest}&out=${c.o.date}&back=${c.b.date}&ro=${c.b.origin}`}
+                            className="block rounded-md transition-colors hover:bg-grade"
+                            title="ver os voos dessa combinacao"
+                          >
                             <div className={`font-mono text-[15px] font-semibold ${isBest ? "text-destaque-texto" : ""}`}>
                               {formatBRL(c.best ?? 0)}
                             </div>
@@ -145,7 +149,7 @@ export default async function MatrizPage() {
                                 junto: {formatBRL(c.rt ?? 0)}
                               </div>
                             )}
-                          </>
+                          </Link>
                         ) : (
                           <span className="text-mut">—</span>
                         )}

@@ -149,7 +149,11 @@ export default async function ColombiaMarcoPage() {
                         className={`p-1.5 text-center align-top ${(ci + 1) % 3 === 0 ? "border-r border-borda" : ""} ${isBest ? "bg-[#E3F4EA]" : ""}`}
                       >
                         {c.sum !== null || c.rt !== null ? (
-                          <>
+                          <Link
+                            href={`/celula?o=SSA&d=${c.o.dest}&out=${c.o.date}&back=${c.b.date}&ro=${c.b.origin}`}
+                            className="block rounded-md transition-colors hover:bg-grade"
+                            title="ver os voos dessa combinacao"
+                          >
                             <div className={`font-mono text-[15px] font-semibold ${isBest ? "text-destaque-texto" : ""}`}>
                               {formatBRL(c.best ?? 0)}
                             </div>
@@ -161,7 +165,7 @@ export default async function ColombiaMarcoPage() {
                                 junto: {formatBRL(c.rt ?? 0)}
                               </div>
                             )}
-                          </>
+                          </Link>
                         ) : (
                           <span className="text-mut">—</span>
                         )}
